@@ -31,7 +31,7 @@
             background-color: #fff;
             background-image:
                 repeating-linear-gradient(45deg, transparent, transparent 38px, var(--grid-line) 38px, var(--grid-line) 39px),
-                repeating-linear-gradient(-45deg, transparent, transparent 38px, var(--grid-line) 38px, var(--grid-line) 39px);
+                repeating-linear-gradient(-45deg, transparent, transparent 38px, var(--grid-line) 39px);
             color: var(--ink);
             display: flex;
             justify-content: center;
@@ -137,7 +137,7 @@
     </div>
 
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-        <div class="drop-icon">📁</div>
+        <div class="drop-icon">📂</div>
         <div class="drop-text">اسحب وإفلت صفحات الفصل هنا</div>
         <div class="drop-subtext">تنزل كاملة بدون تقطيع أو ضياع جودة</div>
         <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
@@ -156,6 +156,7 @@
 
 <script>
     let selectedFiles = [];
+    let previewUrls = [];
 
     function handleFiles(files) {
         const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
@@ -165,6 +166,10 @@
 
     function updateUI() {
         const previewGrid = document.getElementById('previewGrid');
+        
+        // تنظيف ذاكرة الصور القديمة بالكامل لتفادي خطأ الذاكرة بالموبايل
+        previewUrls.forEach(url => URL.revokeObjectURL(url));
+        previewUrls = [];
         previewGrid.innerHTML = '';
         
         let totalSize = 0;
@@ -175,15 +180,17 @@
             const item = document.createElement('div');
             item.className = 'preview-item';
             
+            const imgUrl = URL.createObjectURL(file);
+            previewUrls.push(imgUrl);
+
             const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
+            img.src = imgUrl;
 
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-btn';
             removeBtn.innerText = '✕';
             removeBtn.onclick = (e) => {
                 e.stopPropagation();
-                URL.revokeObjectURL(img.src);
                 selectedFiles.splice(index, 1);
                 updateUI();
             };
@@ -227,31 +234,36 @@
                 let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
                 const fileBytes = await readFileAsUint8Array(file);
+                // level: 0 بدون ضغط حتى الموبايل يقراها بلحظات
                 zipFilesData[fileName] = [fileBytes, { level: 0 }];
 
-                let percent = Math.round(((i + 1) / selectedFiles.length) * 85);
+                let percent = Math.round(((i + 1) / selectedFiles.length) * 80);
                 progressFill.style.width = `${percent}%`;
             }
 
+            // استخدام fflate.zipAsync المباشر بدون مشاكل بالذاكرة
             fflate.zip(zipFilesData, (err, out) => {
                 if (err) {
                     alert('صار خطأ بالضغط، حاول مرة ثانية.');
                     btn.disabled = false;
+                    progressBar.style.display = 'none';
                     return;
                 }
 
                 progressFill.style.width = '100%';
 
                 const blob = new Blob([out], { type: 'application/zip' });
+                const downloadUrl = URL.createObjectURL(blob);
+                
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
+                link.href = downloadUrl;
                 link.download = `${zipName}.zip`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
 
                 setTimeout(() => {
-                    URL.revokeObjectURL(link.href);
+                    URL.revokeObjectURL(downloadUrl);
                     btn.disabled = false;
                     progressBar.style.display = 'none';
                 }, 1000);
