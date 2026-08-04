@@ -7,6 +7,9 @@
     
     <title>PURE - أداة ضغط وتجهيز الفصول</title>
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+    <!-- مكتبة الأيقونات الرسمية -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --white: #ffffff;
@@ -65,8 +68,10 @@
         .subtitle { font-size: 1.05rem; font-weight: 700; color: var(--deep-pink); margin-top: 4px; }
 
         .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
-        .social-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: white; }
-        .tiktok { background: #000; } .discord { background: #5865F2; }
+        .social-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-decoration: none; color: white; transition: transform 0.2s; }
+        .social-btn:active { transform: scale(0.95); }
+        .tiktok { background: #000000; } 
+        .discord { background: #5865F2; }
 
         .input-group { margin-bottom: 15px; }
         input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid var(--pale-pink); border-radius: 14px; outline: none; font-size: 0.95rem; color: var(--ink); background: #fff; text-align: center; font-weight: 700; }
@@ -113,8 +118,12 @@
         <div class="subtitle">أداة تجميع وتجهيز الفصول</div>
         
         <div class="social-links">
-            <a href="https://tiktok.com" target="_blank" class="social-btn tiktok"><span>🎵</span> TikTok</a>
-            <a href="https://discord.gg" target="_blank" class="social-btn discord"><span>💬</span> Discord</a>
+            <a href="https://tiktok.com" target="_blank" class="social-btn tiktok">
+                <i class="fa-brands fa-tiktok"></i> TikTok
+            </a>
+            <a href="https://discord.gg" target="_blank" class="social-btn discord">
+                <i class="fa-brands fa-discord"></i> Discord
+            </a>
         </div>
     </header>
 
