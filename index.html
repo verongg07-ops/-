@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- أسطر منع الكاش لمنع استدعاء النسخ القديمة -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -222,40 +221,7 @@
         progressFill.style.width = '0%';
 
         try {
-            const chunks = [];
-            const zip = new fflate.Zip((err, chunk, final) => {
-                if (err) {
-                    alert('صار خطأ بالضغط، حاول مرة ثانية.');
-                    btn.disabled = false;
-                    progressBar.style.display = 'none';
-                    return;
-                }
-                chunks.push(chunk);
-
-                if (final) {
-                    progressFill.style.width = '100%';
-                    let totalLen = 0;
-                    for (const c of chunks) totalLen += c.length;
-                    const merged = new Uint8Array(totalLen);
-                    let offset = 0;
-                    for (const c of chunks) { merged.set(c, offset); offset += c.length; }
-
-                    const blob = new Blob([merged], { type: 'application/zip' });
-                    const downloadUrl = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = downloadUrl;
-                    link.download = `${zipName}.zip`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-
-                    setTimeout(() => {
-                        URL.revokeObjectURL(downloadUrl);
-                        btn.disabled = false;
-                        progressBar.style.display = 'none';
-                    }, 1000);
-                }
-            });
+            const zipFilesData = {};
 
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
@@ -263,20 +229,41 @@
                 let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
                 const bytes = await readChunk(file);
-                const fileStream = new fflate.ZipPassThrough(fileName);
-                zip.add(fileStream);
-                fileStream.push(bytes, true);
+                zipFilesData[fileName] = [bytes, { level: 0 }];
 
-                let percent = Math.round(((i + 1) / selectedFiles.length) * 90);
+                let percent = Math.round(((i + 1) / selectedFiles.length) * 80);
                 progressFill.style.width = `${percent}%`;
-
-                await new Promise(r => setTimeout(r, 0));
             }
 
-            zip.end();
+            fflate.zip(zipFilesData, { level: 0 }, (err, out) => {
+                if (err) {
+                    alert('صار خطأ بالضغط، حاول مرة ثانية.');
+                    btn.disabled = false;
+                    progressBar.style.display = 'none';
+                    return;
+                }
+
+                progressFill.style.width = '100%';
+
+                const blob = new Blob([out], { type: 'application/zip' });
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `${zipName}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(downloadUrl);
+                    btn.disabled = false;
+                    progressBar.style.display = 'none';
+                }, 1000);
+            });
 
         } catch (err) {
-            alert('صار خطأ بالذاكرة، جرب تفرغ المتصفح وترفع الملفات.');
+            alert('صار خطأ بالذاكرة، حاول تقسم الملفات لجزئين.');
             btn.disabled = false;
             progressBar.style.display = 'none';
         }
