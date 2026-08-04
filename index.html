@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- أسطر منع الكاش لمنع استدعاء النسخ القديمة -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>PURE - أداة ضغط وتجهيز الفصول</title>
-    <!-- مكتبة fflate للضغط الفائق والسريع -->
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
     <style>
         :root {
@@ -166,7 +170,6 @@
     function updateUI() {
         const previewGrid = document.getElementById('previewGrid');
         previewGrid.innerHTML = '';
-        
         let totalSize = 0;
 
         selectedFiles.forEach((file, index) => {
@@ -175,7 +178,6 @@
             const item = document.createElement('div');
             item.className = 'preview-item';
             
-            // استخدام URL مؤقت خفيف بدون تحميل الصورة كاملة للذاكرة
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
             img.onload = () => URL.revokeObjectURL(img.src);
@@ -197,7 +199,6 @@
         document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${(totalSize / (1024 * 1024)).toFixed(1)}MB`;
     }
 
-    // قراءة الملف قطعة واحدة متسلسلة للحد من استهلاك الـ RAM على الأجهزة الضعيفة
     function readChunk(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -223,13 +224,11 @@
         try {
             const zipFilesData = {};
 
-            // المعالجة التسلسلية الحذرة جداً
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
                 let ext = file.name.split('.').pop();
                 let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
-                // تحويل كل صورة على حدة ومباشرة تنمسح من ذاكرة التراكم
                 const bytes = await readChunk(file);
                 zipFilesData[fileName] = [bytes, { level: 0 }];
 
@@ -237,7 +236,6 @@
                 progressFill.style.width = `${percent}%`;
             }
 
-            // الضغط بنسبة 0 (Store فقط) لمنع الضغط الإضافي على المعالج والـ RAM
             fflate.zip(zipFilesData, { level: 0 }, (err, out) => {
                 if (err) {
                     alert('صار خطأ بالضغط، حاول مرة ثانية.');
@@ -266,7 +264,7 @@
             });
 
         } catch (err) {
-            alert('صار خطأ بالذاكرة، جرب تفرغ المتصفح وترفع الملفات.');
+            alert('صار خطأ بالذاكرة، حاول تقسم الملفات لجزئين.');
             btn.disabled = false;
             progressBar.style.display = 'none';
         }
