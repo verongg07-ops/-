@@ -113,8 +113,6 @@
 
         .progress-bar { width: 100%; height: 10px; background: var(--pale-pink); border-radius: 5px; margin-top: 12px; overflow: hidden; display: none; }
         .progress-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.1s; }
-        
-        #errorConsole { display: none; margin-top: 15px; background: #2a0416; color: #ff9ec7; padding: 10px; border-radius: 10px; font-size: 0.75rem; text-align: left; direction: ltr; word-break: break-all; max-height: 120px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -125,7 +123,7 @@
 <div class="mobile-card">
     <header>
         <div class="logo"><span class="l1">P</span><span class="l2">U</span><span class="logo-eye"></span><span class="l3">R</span><span class="l4">E</span></div>
-        <div class="subtitle">أداة تجميع وتجهيز الفصول (v2)</div>
+        <div class="subtitle">أداة تجميع وتجهيز الفصول</div>
         
         <div class="social-links">
             <a href="https://tiktok.com" target="_blank" class="social-btn"><i class="fa-brands fa-tiktok"></i></a>
@@ -149,7 +147,7 @@
 
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
         <div class="drop-icon">📂</div>
-        <div class="drop-text">اضغط هنا لاختيار صفحات الفصل</div>
+        <div class="drop-text" id="dropText">اضغط هنا لاختيار صفحات الفصل</div>
         <div class="drop-subtext">اختر الصور دفعة واحدة</div>
         <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
     </div>
@@ -163,16 +161,39 @@
     </button>
 
     <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-    <div id="errorConsole"></div>
 </div>
 
 <script>
-    let selectedFiles = [];
+    // مصفوفة لتخزين بيانات الصور مسبقاً بالذاكرة لمنع مشاكل صلاحيات الموبايل
+    let loadedFiles = [];
 
-    function handleFiles(files) {
+    async function handleFiles(files) {
+        const dropText = document.getElementById('dropText');
+        dropText.innerText = "جاري تحميل الصور...";
+        
         const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
         newFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-        selectedFiles = selectedFiles.concat(newFiles);
+
+        for (let file of newFiles) {
+            try {
+                // قراءة قوية ومباشرة للملف للذاكرة الحية
+                const buffer = await file.arrayBuffer();
+                const blob = new Blob([buffer], { type: file.type });
+                const url = URL.createObjectURL(blob);
+                
+                loadedFiles.push({
+                    name: file.name,
+                    ext: file.name.split('.').pop() || 'png',
+                    size: file.size,
+                    data: new Uint8Array(buffer),
+                    url: url
+                });
+            } catch (e) {
+                console.error("خطأ بملف:", file.name, e);
+            }
+        }
+
+        dropText.innerText = "اضغط هنا لاختيار المزيد من الصفحات";
         updateUI();
     }
 
@@ -181,21 +202,21 @@
         previewGrid.innerHTML = '';
         let totalSize = 0;
 
-        selectedFiles.forEach((file, index) => {
-            totalSize += file.size;
+        loadedFiles.forEach((fileObj, index) => {
+            totalSize += fileObj.size;
             const item = document.createElement('div');
             item.className = 'preview-item';
             
             const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.onload = () => URL.revokeObjectURL(img.src);
+            img.src = fileObj.url;
 
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-btn';
             removeBtn.innerText = '✕';
             removeBtn.onclick = (e) => {
                 e.stopPropagation();
-                selectedFiles.splice(index, 1);
+                URL.revokeObjectURL(loadedFiles[index].url);
+                loadedFiles.splice(index, 1);
                 updateUI();
             };
 
@@ -205,52 +226,45 @@
         });
 
         let sizeMB = totalSize / (1024 * 1024);
-        document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${isNaN(sizeMB) ? 0 : sizeMB.toFixed(1)}MB`;
+        document.getElementById('statsBar').innerText = `عدد الصور: ${loadedFiles.length} | الحجم: ~${isNaN(sizeMB) ? 0 : sizeMB.toFixed(1)}MB`;
     }
 
     async function processAndZipStable() {
-        if (selectedFiles.length === 0) return alert('يمعود اختار صور الفصل أول شي!');
+        if (loadedFiles.length === 0) return alert('يمعود اختار صور الفصل أول شي!');
 
         const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
         const shouldRename = document.getElementById('renameFiles').checked;
         const btn = document.getElementById('submitBtn');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
-        const consoleBox = document.getElementById('errorConsole');
 
-        consoleBox.style.display = 'none';
-        consoleBox.innerHTML = '';
         btn.disabled = true;
         progressBar.style.display = 'block';
-        progressFill.style.width = '0%';
+        progressFill.style.width = '10%';
 
         try {
             const chunks = {};
-            const total = selectedFiles.length;
+            const total = loadedFiles.length;
 
             for (let i = 0; i < total; i++) {
-                const file = selectedFiles[i];
-                let ext = file.name.split('.').pop() || 'jpg';
-                let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
+                const item = loadedFiles[i];
+                let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${item.ext}` : item.name;
+                
+                // ربط البيانات المحفوظة مباشرة
+                chunks[fileName] = [item.data, { level: 0 }];
 
-                try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    chunks[fileName] = [new Uint8Array(arrayBuffer), { level: 0 }];
-                } catch (readErr) {
-                    consoleBox.style.display = 'block';
-                    consoleBox.innerHTML += `تخطي الملف ${fileName}: ${readErr.message}<br>`;
-                }
-
-                let percent = Math.round(((i + 1) / total) * 90);
+                let percent = Math.round(((i + 1) / total) * 80) + 10;
                 progressFill.style.width = `${percent}%`;
             }
 
-            if (Object.keys(chunks).length === 0) {
-                throw new Error('عذراً، لم يتم العثور على أي ملف صالح للضغط.');
-            }
-
+            // عملية الضغط المباشرة
             fflate.zip(chunks, { level: 0 }, (err, out) => {
-                if (err) throw err;
+                if (err) {
+                    alert('حدث خطأ أثناء إنشاء الـ ZIP: ' + err.message);
+                    btn.disabled = false;
+                    progressBar.style.display = 'none';
+                    return;
+                }
 
                 progressFill.style.width = '100%';
                 const blob = new Blob([out], { type: 'application/zip' });
@@ -271,8 +285,7 @@
             });
 
         } catch (uploadErr) {
-            consoleBox.style.display = 'block';
-            consoleBox.innerHTML += `<b>Error:</b> ${uploadErr.message}`;
+            alert('خطأ: ' + uploadErr.message);
             btn.disabled = false;
             progressBar.style.display = 'none';
         }
