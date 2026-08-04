@@ -134,15 +134,15 @@
 
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
         <div class="drop-icon">📂</div>
-        <div class="drop-text">اسحب وإفلت صفحات الفصل هنا</div>
-        <div class="drop-subtext">تنزل كاملة بدون تقطيع أو ضياع جودة</div>
+        <div class="drop-text">اضغط هنا لاختيار صفحات الفصل</div>
+        <div class="drop-subtext">تجنباً لمشاكل الموبايل، اختر الصور دفعة واحدة</div>
         <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
     </div>
 
     <div class="preview-grid" id="previewGrid"></div>
     <div class="stats-bar" id="statsBar">عدد الصور: 0 | الحجم: ~0MB</div>
 
-    <button class="btn-submit" id="submitBtn" onclick="processAndZipBulletproof()">
+    <button class="btn-submit" id="submitBtn" onclick="processAndZipStable()">
         <span>توليد وتنزيل ملف ZIP</span>
         <span>💖</span>
     </button>
@@ -156,6 +156,8 @@
 
     function handleFiles(files) {
         const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+        // ترتيب الصور حسب الاسم لضمان التسلسل الصحيح دائماً
+        newFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
         selectedFiles = selectedFiles.concat(newFiles);
         updateUI();
     }
@@ -188,12 +190,13 @@
             previewGrid.appendChild(item);
         });
 
-        document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${(totalSize / (1024 * 1024)).deg === 'NaN' ? 0 : (totalSize / (1024 * 1024)).toFixed(1)}MB`;
+        let sizeMB = totalSize / (1024 * 1024);
+        document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${isNaN(sizeMB) ? 0 : sizeMB.toFixed(1)}MB`;
     }
 
-    // المعالجة المجهزة المضادة للتلف عبر استخدام Buffer آمن ومباشر
-    async function processAndZipBulletproof() {
-        if (selectedFiles.length === 0) return alert('يمعود اختار صور أول شي!');
+    // المعالجة المستقرة الثابتة لمنع تلف الأسماء وضمان قراءة سليمة 100%
+    async function processAndZipStable() {
+        if (selectedFiles.length === 0) return alert('يمعود اختار صور الفصل أول شي!');
 
         const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
         const shouldRename = document.getElementById('renameFiles').checked;
@@ -215,28 +218,26 @@
             for (let i = 0; i < total; i++) {
                 const file = selectedFiles[i];
                 let ext = file.name.split('.').pop() || 'jpg';
+                // تثبيت التسمية التسلسلية بدقة لمنع ظهور الأخطاء
                 let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
                 try {
-                    // استخدام الـ Modern ArrayBuffer المباشر لتجاوز أخطاء القراءة على الموبايل
                     const arrayBuffer = await file.arrayBuffer();
                     chunks[fileName] = [new Uint8Array(arrayBuffer), { level: 0 }];
                 } catch (readErr) {
-                    // إذا صار خطأ بملف واحد، نسجل الخطأ بالكونسول ونتخطاه بدل ما يفشل الفصل كله
                     consoleBox.style.display = 'block';
-                    consoleBox.innerHTML += `تخطي الملف رقم ${i+1}: ${readErr.message}<br>`;
+                    consoleBox.innerHTML += `تخطي الملف ${fileName}: ${readErr.message}<br>`;
                 }
 
                 let percent = Math.round(((i + 1) / total) * 90);
                 progressFill.style.width = `${percent}%`;
 
-                // راحة تامة لمعالج الموبايل كل 10 صور لمنع حدوث تجميد أو توقف
-                if (i % 10 === 0) {
-                    await new Promise(r => setTimeout(r, 15));
+                // راحة لمعالج الموبايل كل 15 صورة لمنع التهنيج
+                if (i % 15 === 0) {
+                    await new Promise(r => setTimeout(r, 10));
                 }
             }
 
-            // التأكد من وجود ملفات صالحة للضغط
             if (Object.keys(chunks).length === 0) {
                 throw new Error('عذراً، لم يتم العثور على أي ملف صالح للضغط.');
             }
@@ -262,10 +263,9 @@
                 }, 1000);
             });
 
-        } catch (err) {
+        } uploadErr => {
             consoleBox.style.display = 'block';
-            consoleBox.innerHTML += `<b>Critical Error:</b> ${err.message || err}`;
-            alert('حدث خطأ في معالجة الملفات الضخمة. تأكد من أن الصور سليمة وحاول مرة أخرى.');
+            consoleBox.innerHTML += `<b>Error:</b> ${uploadErr.message}`;
             btn.disabled = false;
             progressBar.style.display = 'none';
         }
