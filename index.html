@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أداة ضغط فصول المانجا - PURE</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    
+    <title>PURE - أداة ضغط وتجهيز الفصول</title>
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --white: #ffffff;
@@ -16,8 +20,9 @@
             --ink: #4a0b2c;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; user-select: none; }
-        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        html, body { min-height: 100vh; }
+
         body {
             background-color: #fff;
             background-image:
@@ -33,440 +38,244 @@
             overflow-x: hidden;
         }
 
-        .shard { position: fixed; pointer-events: none; z-index: 0; opacity: 0.95; }
-        .shard-1 { top: -40px; left: -60px; width: 300px; height: 300px; background: var(--hot-pink); clip-path: polygon(0 0, 75% 0, 100% 45%, 45% 100%, 0 75%); opacity: 0.9; }
-        .shard-2 { top: 12%; right: -90px; width: 320px; height: 250px; background: var(--deep-pink); clip-path: polygon(100% 0, 100% 100%, 15% 90%, 0 25%, 65% 0); }
-        .shard-3 { bottom: -80px; left: -30px; width: 260px; height: 260px; background: var(--hot-pink); clip-path: polygon(0 25%, 85% 0, 100% 75%, 35% 100%, 0 85%); opacity: 0.8; }
-        .shard-4 { bottom: -50px; right: -40px; width: 280px; height: 220px; background: var(--magenta); clip-path: polygon(20% 0, 100% 20%, 80% 100%, 0 80%); opacity: 0.85; }
+        .shard { position: fixed; pointer-events: none; z-index: 0; opacity: 0.9; }
+        .shard-1 { top: -60px; left: -40px; width: 260px; height: 260px; background: var(--hot-pink); clip-path: polygon(0 0, 70% 0, 100% 40%, 55% 100%, 0 70%); opacity: 0.85; }
+        .shard-2 { top: 8%; right: -80px; width: 300px; height: 220px; background: var(--deep-pink); clip-path: polygon(100% 0, 100% 100%, 20% 100%, 0 30%, 60% 0); }
+        .shard-3 { bottom: -70px; left: 6%; width: 220px; height: 220px; background: var(--pale-pink); clip-path: polygon(20% 0, 100% 10%, 80% 100%, 0 90%); }
+        .shard-4 { bottom: -40px; right: 4%; width: 240px; height: 180px; background: var(--hot-pink); clip-path: polygon(0 20%, 60% 0, 100% 60%, 40% 100%, 0 80%); opacity: 0.5; }
 
-        .card {
+        .mobile-card {
             position: relative;
             z-index: 1;
             width: 100%;
             max-width: 420px;
             background: #ffffff;
             border-radius: 26px;
-            padding: 24px;
-            box-shadow: 0 20px 40px rgba(157, 10, 82, 0.15);
+            padding: 26px 24px;
+            box-shadow: 0 24px 50px rgba(157, 10, 82, 0.18);
             border: 3px solid var(--pale-pink);
-            text-align: center;
         }
 
-        .header-box {
-            background: var(--pale-pink);
-            border: 1px solid #ffc3e0;
-            border-radius: 20px;
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
+        header { text-align: center; margin-bottom: 22px; }
+        .logo { font-size: 3.2rem; font-weight: 900; letter-spacing: 2px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; gap: 2px; }
+        .logo span { display: inline-block; -webkit-text-stroke: 2px var(--magenta); }
+        .logo .l1 { color: var(--pale-pink); }
+        .logo .l2 { color: var(--hot-pink); transform: translateY(-2px); }
+        .logo .l3 { color: var(--deep-pink); transform: translateY(2px); }
+        .logo .l4 { color: var(--hot-pink); }
+        .logo-eye { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--ink) 0 5px, var(--hot-pink) 6px 12px, transparent 13px); border: 2px solid var(--magenta); display: inline-block; }
+        .subtitle { font-size: 1.05rem; font-weight: 700; color: var(--deep-pink); margin-top: 4px; }
 
-        .header-title {
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: var(--magenta);
-            letter-spacing: 0.5px;
+        .social-links { display: flex; justify-content: center; gap: 14px; margin-top: 14px; }
+        .social-btn { 
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: center !important; 
+            width: 56px !important; 
+            height: 56px !important; 
+            background: #ffe1ef !important; 
+            border: 3px solid #ffb3d9 !important; 
+            border-radius: 18px !important; 
+            font-size: 1.8rem !important; 
+            color: #9d0a52 !important; 
+            text-decoration: none !important; 
+            transition: transform 0.2s, background-color 0.2s !important; 
         }
+        .social-btn:active { transform: scale(0.92); }
 
-        .header-logo {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 2px solid var(--hot-pink);
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: var(--magenta);
-        }
+        .input-group { margin-bottom: 15px; }
+        input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid var(--pale-pink); border-radius: 14px; outline: none; font-size: 0.95rem; color: var(--ink); background: #fff; text-align: center; font-weight: 700; }
 
-        .sub-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: var(--magenta);
-            margin-bottom: 16px;
-        }
+        .toggle-group { background: var(--pale-pink); padding: 12px 16px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #ffc3e0; }
+        .toggle-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--magenta); }
 
-        .section-label {
-            text-align: right;
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: var(--magenta);
-            margin-bottom: 8px;
-        }
-
-        .input-group { margin-bottom: 12px; }
-        input[type="text"] { 
-            width: 100%; 
-            padding: 14px; 
-            border: 2px solid var(--pale-pink); 
-            border-radius: 16px; 
-            outline: none; 
-            font-size: 0.95rem; 
-            color: var(--ink); 
-            background: #fff; 
-            text-align: center; 
-            font-weight: 700; 
-        }
-
-        .toggle-group { 
-            background: var(--pale-pink); 
-            padding: 12px 18px; 
-            border-radius: 18px; 
-            margin-bottom: 16px; 
-            border: 1px solid #ffc3e0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .toggle-label { font-size: 0.9rem; font-weight: 700; color: var(--magenta); }
-
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f3b8d3; transition: .3s; border-radius: 26px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f3b8d3; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--hot-pink); }
-        input:checked + .slider:before { transform: translateX(24px); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        .drop-zone { 
-            border: 2.5px dashed var(--hot-pink); 
-            background: #fff8fb; 
-            border-radius: 20px; 
-            padding: 20px 15px; 
-            text-align: center; 
-            cursor: pointer; 
-            margin-bottom: 16px; 
-        }
-        .drop-icon { font-size: 2.5rem; margin-bottom: 6px; }
-        .drop-text { font-size: 1rem; font-weight: 800; color: var(--magenta); }
-        .drop-subtext { font-size: 0.8rem; color: var(--deep-pink); opacity: 0.8; margin-top: 4px; }
+        .drop-zone { border: 2.5px dashed var(--hot-pink); background: #fff8fb; border-radius: 18px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 18px; }
+        .drop-icon { font-size: 2.2rem; }
+        .drop-text { font-size: 0.95rem; font-weight: 700; color: var(--magenta); margin-top: 4px; }
+        .drop-subtext { font-size: 0.75rem; color: var(--deep-pink); opacity: 0.8; }
 
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--magenta);
-            margin-bottom: 8px;
-        }
-
-        .preview-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 8px; 
-            max-height: 180px; 
-            overflow-y: auto; 
-            margin-bottom: 16px; 
-            padding: 2px;
-        }
-        .preview-item { 
-            position: relative; 
-            width: 100%; 
-            height: 80px; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            border: 2px solid var(--pale-pink); 
-        }
+        .preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 160px; overflow-y: auto; margin-bottom: 18px; }
+        .preview-item { position: relative; width: 100%; height: 75px; border-radius: 10px; overflow: hidden; border: 2px solid var(--pale-pink); }
         .preview-item img { width: 100%; height: 100%; object-fit: cover; }
-        .preview-item .remove-btn { 
-            position: absolute; 
-            top: 3px; 
-            right: 3px; 
-            background: var(--magenta); 
-            color: white; 
-            border: none; 
-            width: 20px; 
-            height: 20px; 
-            border-radius: 50%; 
-            font-size: 11px; 
-            font-weight: bold;
-            cursor: pointer; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .preview-item .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(157, 10, 82, 0.85); color: white; border: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; cursor: pointer; }
 
-        .stats-bar { 
-            background: var(--pale-pink); 
-            padding: 12px; 
-            border-radius: 14px; 
-            text-align: center; 
-            font-size: 0.9rem; 
-            font-weight: 800; 
-            color: var(--magenta); 
-            margin-bottom: 16px; 
-        }
+        .stats-bar { background: var(--pale-pink); padding: 10px; border-radius: 12px; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--magenta); margin-bottom: 16px; }
 
-        .btn-submit { 
-            width: 100%; 
-            background: linear-gradient(135deg, #ff3d8b 0%, #a80954 100%); 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 16px; 
-            font-size: 1.15rem; 
-            font-weight: 800; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px; 
-            box-shadow: 0 8px 20px rgba(255, 61, 139, 0.3);
-            margin-bottom: 16px;
-        }
-        .btn-submit:disabled { background: #d8c1cd; box-shadow: none; cursor: not-allowed; }
+        .btn-submit { width: 100%; background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit:disabled { background: #d8c1cd; cursor: not-allowed; }
 
-        /* الأيقونات بالأسفل تحت الزر تماماً */
-        .social-row-bottom {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-
-        .social-btn {
-            width: 48px;
-            height: 48px;
-            background: var(--pale-pink);
-            border: 1px solid #ffc3e0;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .social-btn:active {
-            background: var(--hot-pink);
-        }
-
-        .social-btn:active svg {
-            fill: #fff;
-        }
-
-        .social-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--magenta);
-        }
-
-        .debug-box { 
-            margin-top: 10px; 
-            background: #12020a; 
-            color: #ff85b3; 
-            padding: 12px; 
-            border-radius: 14px; 
-            font-family: monospace; 
-            font-size: 0.75rem; 
-            max-height: 120px; 
-            overflow-y: auto; 
-            text-align: left; 
-            direction: ltr; 
-            border: 1px solid var(--hot-pink);
-        }
-        .err { color: #ff4d4d; }
-        .suc { color: #4dff88; }
+        .progress-bar { width: 100%; height: 10px; background: var(--pale-pink); border-radius: 5px; margin-top: 12px; overflow: hidden; display: none; }
+        .progress-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.1s; }
+        
+        #errorConsole { display: none; margin-top: 15px; background: #2a0416; color: #ff9ec7; padding: 10px; border-radius: 10px; font-size: 0.75rem; text-align: left; direction: ltr; word-break: break-all; max-height: 120px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-<div class="shard shard-1"></div>
-<div class="shard shard-2"></div>
-<div class="shard shard-3"></div>
-<div class="shard shard-4"></div>
+<div class="shard shard-1"></div><div class="shard shard-2"></div>
+<div class="shard shard-3"></div><div class="shard shard-4"></div>
 
-<div class="card">
-    <div class="header-box">
-        <div class="header-logo">PURE</div>
-        <div class="header-title">PURE TEAM</div>
-    </div>
-
-    <div class="sub-title">أداة ضغط فصول المانجا</div>
-
-    <div class="section-label">إعدادات الأرشيف</div>
+<div class="mobile-card">
+    <header>
+        <div class="logo"><span class="l1">P</span><span class="l2">U</span><span class="logo-eye"></span><span class="l3">R</span><span class="l4">E</span></div>
+        <div class="subtitle">أداة تجميع وتجهيز الفصول (v2)</div>
+        
+        <div class="social-links">
+            <a href="https://tiktok.com" target="_blank" class="social-btn"><i class="fa-brands fa-tiktok"></i></a>
+            <a href="https://discord.gg" target="_blank" class="social-btn"><i class="fa-brands fa-discord"></i></a>
+        </div>
+    </header>
 
     <div class="input-group">
-        <input type="text" id="zipName" placeholder="اسم مجلد الـ ZIP (مثلاً: Ch_01_PURE)">
+        <input type="text" id="zipName" placeholder="اسم ملف الـ ZIP (مثلاً: Ch_01_PURE)">
     </div>
 
     <div class="toggle-group">
-        <span class="toggle-label">تسمية تلقائية (001, 002...)</span>
-        <label class="switch">
-            <input type="checkbox" id="renameFiles" checked>
-            <span class="slider"></span>
-        </label>
+        <div class="toggle-item">
+            <span>تسمية تسلسلية (001, 002...)</span>
+            <label class="switch">
+                <input type="checkbox" id="renameFiles" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
-    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-        <div class="drop-icon">📁</div>
-        <div class="drop-text">اسحب وإفلت الصور هنا، أو اضغط للاختيار</div>
-        <div class="drop-subtext">تدعم: JPG, PNG, WebP (عدد غير محدود)</div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="loadFilesDirectly(this.files)">
-    </div>
-
-    <div class="preview-header">
-        <span id="totalCountText">Total Images: 0</span>
-        <span>PREVIEW</span>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="drop-icon">📂</div>
+        <div class="drop-text">اضغط هنا لاختيار صفحات الفصل</div>
+        <div class="drop-subtext">اختر الصور دفعة واحدة</div>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
     </div>
 
     <div class="preview-grid" id="previewGrid"></div>
+    <div class="stats-bar" id="statsBar">عدد الصور: 0 | الحجم: ~0MB</div>
 
-    <div class="stats-bar" id="stats">عدد الصور: 0 | الحجم المتوقع: ~0MB</div>
-
-    <button class="btn-submit" id="mainBtn" onclick="buildZip()" disabled>
-        <span>توليد وتنزل ملف ZIP</span> 💖
+    <button class="btn-submit" id="submitBtn" onclick="processAndZipStable()">
+        <span>توليد وتنزيل ملف ZIP</span>
+        <span>💖</span>
     </button>
 
-    <!-- أزرار التيك توك والديسكورد تحت أداة الضغط بالأسفل -->
-    <div class="social-row-bottom">
-        <a href="#" class="social-btn" title="TikTok">
-            <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.82.56-1.32 1.52-1.28 2.52.02.82.43 1.61 1.08 2.11.83.65 1.96.87 2.97.58 1.08-.3 1.94-1.2 2.16-2.3.08-.5.06-1.01.06-1.52.01-4.73.01-9.46.01-14.19z"/></svg>
-        </a>
-        <a href="#" class="social-btn" title="Discord">
-            <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-        </a>
-    </div>
-
-    <div class="debug-box" id="debugConsole">
-        <div class="suc">[SYSTEM READY] - بانتظار اختيار الصور...</div>
-    </div>
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="errorConsole"></div>
 </div>
 
 <script>
-    let ramStorage = [];
+    let selectedFiles = [];
 
-    function log(msg, isError = false) {
-        const consoleBox = document.getElementById('debugConsole');
-        const time = new Date().toLocaleTimeString();
-        consoleBox.innerHTML += `<div class="${isError ? 'err' : 'suc'}">[${time}] ${msg}</div>`;
-        consoleBox.scrollTop = consoleBox.scrollHeight;
+    function handleFiles(files) {
+        const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+        newFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+        selectedFiles = selectedFiles.concat(newFiles);
+        updateUI();
     }
 
-    function readFileAsArrayBuffer(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(reader.error);
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
-    function readFileAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(reader.error);
-            reader.readAsDataURL(file);
-        });
-    }
-
-    async function loadFilesDirectly(files) {
-        if (!files || files.length === 0) return;
-
-        ramStorage = [];
-        document.getElementById('debugConsole').innerHTML = '';
-        
-        const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
-        fileArray.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-
-        log(`بدء قراءة (${fileArray.length}) صورة للذاكرة...`);
-
-        for (let i = 0; i < fileArray.length; i++) {
-            const f = fileArray[i];
-            try {
-                const [buffer, dataUrl] = await Promise.all([
-                    readFileAsArrayBuffer(f),
-                    readFileAsDataURL(f)
-                ]);
-
-                if (buffer.byteLength === 0) throw new Error("الملف فارغ");
-
-                ramStorage.push({
-                    originalName: f.name,
-                    ext: f.name.split('.').pop() || 'jpg',
-                    bytes: new Uint8Array(buffer),
-                    previewSrc: dataUrl
-                });
-
-            } catch (error) {
-                log(`✕ خطأ بالصورة [${f.name}]: ${error.message}`, true);
-            }
-        }
-
-        renderPreview();
-        log(`اكتمل التحميل في الذاكرة بنجاح. الصور الجاهزة: ${ramStorage.length}`);
-    }
-
-    function removeImage(index) {
-        ramStorage.splice(index, 1);
-        renderPreview();
-    }
-
-    function renderPreview() {
+    function updateUI() {
         const previewGrid = document.getElementById('previewGrid');
         previewGrid.innerHTML = '';
-        let totalSizeBytes = 0;
+        let totalSize = 0;
 
-        ramStorage.forEach((item, i) => {
-            totalSizeBytes += item.bytes.byteLength;
-            const elem = document.createElement('div');
-            elem.className = 'preview-item';
-            elem.innerHTML = `
-                <img src="${item.previewSrc}">
-                <button class="remove-btn" onclick="removeImage(${i})">✕</button>
-            `;
-            previewGrid.appendChild(elem);
+        selectedFiles.forEach((file, index) => {
+            totalSize += file.size;
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.onload = () => URL.revokeObjectURL(img.src);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerText = '✕';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                selectedFiles.splice(index, 1);
+                updateUI();
+            };
+
+            item.appendChild(img);
+            item.appendChild(removeBtn);
+            previewGrid.appendChild(item);
         });
 
-        const sizeMB = (totalSizeBytes / (1024 * 1024)).toFixed(1);
-        document.getElementById('stats').innerText = `عدد الصور: ${ramStorage.length} | الحجم المتوقع: ~${sizeMB}MB`;
-        document.getElementById('totalCountText').innerText = `Total Images: ${ramStorage.length}`;
-        document.getElementById('mainBtn').disabled = ramStorage.length === 0;
+        let sizeMB = totalSize / (1024 * 1024);
+        document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${isNaN(sizeMB) ? 0 : sizeMB.toFixed(1)}MB`;
     }
 
-    function buildZip() {
-        if (ramStorage.length === 0) return;
+    async function processAndZipStable() {
+        if (selectedFiles.length === 0) return alert('يمعود اختار صور الفصل أول شي!');
 
         const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
         const shouldRename = document.getElementById('renameFiles').checked;
-        const btn = document.getElementById('mainBtn');
+        const btn = document.getElementById('submitBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const consoleBox = document.getElementById('errorConsole');
+
+        consoleBox.style.display = 'none';
+        consoleBox.innerHTML = '';
         btn.disabled = true;
+        progressBar.style.display = 'block';
+        progressFill.style.width = '0%';
 
-        log(`جاري ضغط ${ramStorage.length} صورة إلى ${zipName}.zip...`);
+        try {
+            const chunks = {};
+            const total = selectedFiles.length;
 
-        const zipStructure = {};
-        ramStorage.forEach((item, i) => {
-            const finalName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${item.ext}` : item.originalName;
-            zipStructure[finalName] = [item.bytes, { level: 0 }];
-        });
+            for (let i = 0; i < total; i++) {
+                const file = selectedFiles[i];
+                let ext = file.name.split('.').pop() || 'jpg';
+                let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
-        fflate.zip(zipStructure, { level: 0 }, (err, out) => {
-            if (err) {
-                log(`خطأ أثناء الضغط: ${err.message}`, true);
-                btn.disabled = false;
-                return;
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    chunks[fileName] = [new Uint8Array(arrayBuffer), { level: 0 }];
+                } catch (readErr) {
+                    consoleBox.style.display = 'block';
+                    consoleBox.innerHTML += `تخطي الملف ${fileName}: ${readErr.message}<br>`;
+                }
+
+                let percent = Math.round(((i + 1) / total) * 90);
+                progressFill.style.width = `${percent}%`;
             }
 
-            log(`تم التوليد بنجاح! جاري التنزيل...`);
-            const blob = new Blob([out], { type: 'application/zip' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `${zipName}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            
+            if (Object.keys(chunks).length === 0) {
+                throw new Error('عذراً، لم يتم العثور على أي ملف صالح للضغط.');
+            }
+
+            fflate.zip(chunks, { level: 0 }, (err, out) => {
+                if (err) throw err;
+
+                progressFill.style.width = '100%';
+                const blob = new Blob([out], { type: 'application/zip' });
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `${zipName}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(downloadUrl);
+                    btn.disabled = false;
+                    progressBar.style.display = 'none';
+                }, 1000);
+            });
+
+        } catch (uploadErr) {
+            consoleBox.style.display = 'block';
+            consoleBox.innerHTML += `<b>Error:</b> ${uploadErr.message}`;
             btn.disabled = false;
-        });
+            progressBar.style.display = 'none';
+        }
     }
 </script>
 
