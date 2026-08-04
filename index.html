@@ -33,7 +33,6 @@
             overflow-x: hidden;
         }
 
-        /* الشظايا الورديّة بالخلفية */
         .shard { position: fixed; pointer-events: none; z-index: 0; opacity: 0.9; }
         .shard-1 { top: -60px; left: -40px; width: 260px; height: 260px; background: var(--hot-pink); clip-path: polygon(0 0, 70% 0, 100% 40%, 55% 100%, 0 70%); opacity: 0.85; }
         .shard-2 { top: 8%; right: -80px; width: 300px; height: 220px; background: var(--deep-pink); clip-path: polygon(100% 0, 100% 100%, 20% 100%, 0 30%, 60% 0); }
@@ -66,7 +65,6 @@
             font-weight: 700; 
         }
 
-        /* شريط التسمية التسلسلية */
         .toggle-group { 
             background: var(--pale-pink); 
             padding: 12px 18px; 
@@ -86,7 +84,6 @@
         input:checked + .slider { background-color: var(--hot-pink); }
         input:checked + .slider:before { transform: translateX(24px); }
 
-        /* منطقة الإسقاط */
         .drop-zone { 
             border: 2.5px dashed var(--hot-pink); 
             background: #fff8fb; 
@@ -100,7 +97,6 @@
         .drop-text { font-size: 1.05rem; font-weight: 800; color: var(--magenta); }
         .drop-subtext { font-size: 0.8rem; color: var(--deep-pink); opacity: 0.8; margin-top: 4px; }
 
-        /* شبكة معاينة الصور */
         .preview-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -137,7 +133,6 @@
             justify-content: center;
         }
 
-        /* شريط الإحصائيات */
         .stats-bar { 
             background: var(--pale-pink); 
             padding: 12px; 
@@ -149,7 +144,6 @@
             margin-bottom: 16px; 
         }
 
-        /* زر التوليد الوردي الكبير */
         .btn-submit { 
             width: 100%; 
             background: linear-gradient(135deg, #ff3d8b 0%, #a80954 100%); 
@@ -168,7 +162,6 @@
         }
         .btn-submit:disabled { background: #d8c1cd; box-shadow: none; cursor: not-allowed; }
 
-        /* الشاشة السوداء المدمجة */
         .debug-box { 
             margin-top: 15px; 
             background: #12020a; 
@@ -210,7 +203,7 @@
     <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
         <div class="drop-icon">📁</div>
         <div class="drop-text">اسحب وإفلت صفحات الفصل هنا</div>
-        <div class="drop-subtext">تنزل كاملة بدون تقطيع أو ضياع جودة</div>
+        <div class="drop-subtext">تتم المعالجة بالذاكرة فوراً وبدون أي تقطيع</div>
         <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="loadFilesDirectly(this.files)">
     </div>
 
@@ -237,54 +230,59 @@
         consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
+    function readFileAsArrayBuffer(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    function readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+        });
+    }
+
     async function loadFilesDirectly(files) {
         if (!files || files.length === 0) return;
 
         ramStorage = [];
-        const previewGrid = document.getElementById('previewGrid');
-        previewGrid.innerHTML = '';
         document.getElementById('debugConsole').innerHTML = '';
         
-        log(`تم اختيار ${files.length} ملف. جاري التحميل المباشر...`);
-
         const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
         fileArray.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-        let totalSizeBytes = 0;
+        log(`بدء قراءة (${fileArray.length}) صورة للذاكرة...`);
 
         for (let i = 0; i < fileArray.length; i++) {
             const f = fileArray[i];
             try {
-                const buffer = await f.arrayBuffer();
-                if (buffer.byteLength === 0) throw new Error("الملف فارغ");
+                const [buffer, dataUrl] = await Promise.all([
+                    readFileAsArrayBuffer(f),
+                    readFileAsDataURL(f)
+                ]);
 
-                totalSizeBytes += buffer.byteLength;
-                const blobUrl = URL.createObjectURL(f);
+                if (buffer.byteLength === 0) throw new Error("الملف فارغ");
 
                 ramStorage.push({
                     originalName: f.name,
                     ext: f.name.split('.').pop() || 'jpg',
                     bytes: new Uint8Array(buffer),
-                    blobUrl: blobUrl
+                    previewSrc: dataUrl
                 });
-
-                // إضافة المعاينة
-                const item = document.createElement('div');
-                item.className = 'preview-item';
-                item.innerHTML = `
-                    <img src="${blobUrl}">
-                    <button class="remove-btn" onclick="removeImage(${ramStorage.length - 1})">✕</button>
-                `;
-                previewGrid.appendChild(item);
 
             } catch (error) {
                 log(`✕ خطأ بالصورة [${f.name}]: ${error.message}`, true);
             }
         }
 
-        updateStats(totalSizeBytes);
-        document.getElementById('mainBtn').disabled = ramStorage.length === 0;
-        log(`اكتمل الجلب بنجاح. الصور الجاهزة: ${ramStorage.length}`);
+        renderPreview();
+        log(`اكتمل التحميل في الذاكرة بنجاح. الصور الجاهزة: ${ramStorage.length}`);
     }
 
     function removeImage(index) {
@@ -302,19 +300,15 @@
             const elem = document.createElement('div');
             elem.className = 'preview-item';
             elem.innerHTML = `
-                <img src="${item.blobUrl}">
+                <img src="${item.previewSrc}">
                 <button class="remove-btn" onclick="removeImage(${i})">✕</button>
             `;
             previewGrid.appendChild(elem);
         });
 
-        updateStats(totalSizeBytes);
+        const sizeMB = (totalSizeBytes / (1024 * 1024)).toFixed(1);
+        document.getElementById('stats').innerText = `جاهز بالذاكرة: ${ramStorage.length} صورة | الحجم: ~${sizeMB}MB`;
         document.getElementById('mainBtn').disabled = ramStorage.length === 0;
-    }
-
-    function updateStats(totalBytes) {
-        const sizeMB = (totalBytes / (1024 * 1024)).toFixed(1);
-        document.getElementById('stats').innerText = `عدد الصور: ${ramStorage.length} | الحجم: ~${sizeMB}MB`;
     }
 
     function buildZip() {
@@ -340,7 +334,7 @@
                 return;
             }
 
-            log(`تم التوليد بنجاح! جاري تنزيل الملف...`);
+            log(`تم التوليد بنجاح! جاري التنزيل...`);
             const blob = new Blob([out], { type: 'application/zip' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
