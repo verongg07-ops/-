@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    
     <title>PURE - أداة ضغط وتجهيز الفصول</title>
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
     <style>
         :root {
-            --white: #ffffff;
-            --grid-line: #f6cfe4;
             --hot-pink: #ff3d8b;
             --deep-pink: #c81466;
             --magenta: #9d0a52;
@@ -18,241 +14,116 @@
             --ink: #4a0b2c;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-        body {
-            background-color: #fff;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 38px, var(--grid-line) 38px, var(--grid-line) 39px);
-            color: var(--ink);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background: #fff8fb; color: var(--ink); padding: 20px; display: flex; justify-content: center; }
 
-        .mobile-card {
-            width: 100%;
-            max-width: 420px;
-            background: #ffffff;
-            border-radius: 26px;
-            padding: 26px 24px;
-            box-shadow: 0 24px 50px rgba(157, 10, 82, 0.18);
-            border: 3px solid var(--pale-pink);
-        }
+        .card { width: 100%; max-width: 420px; background: #fff; border: 3px solid var(--pale-pink); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        h2 { text-align: center; color: var(--hot-pink); margin-bottom: 15px; }
 
-        header { text-align: center; margin-bottom: 22px; }
-        .logo { font-size: 3.2rem; font-weight: 900; line-height: 1; color: var(--hot-pink); }
-        .subtitle { font-size: 1.05rem; font-weight: 700; color: var(--deep-pink); margin-top: 4px; }
-
-        .input-group { margin-bottom: 15px; }
-        input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid var(--pale-pink); border-radius: 14px; outline: none; font-size: 0.95rem; color: var(--ink); text-align: center; font-weight: 700; }
-
-        .toggle-group { background: var(--pale-pink); padding: 12px 16px; border-radius: 16px; margin-bottom: 18px; }
-        .toggle-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--magenta); }
-
-        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f3b8d3; transition: .3s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--hot-pink); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        .drop-zone { border: 2.5px dashed var(--hot-pink); background: #fff8fb; border-radius: 18px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 18px; }
-        .drop-text { font-size: 0.95rem; font-weight: 700; color: var(--magenta); }
-        .drop-subtext { font-size: 0.75rem; color: var(--deep-pink); opacity: 0.8; margin-top: 4px; }
-
-        .stats-bar { background: var(--pale-pink); padding: 10px; border-radius: 12px; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--magenta); margin-bottom: 16px; }
-
-        .btn-submit { width: 100%; background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; }
-        .btn-submit:disabled { background: #d8c1cd; cursor: not-allowed; }
-
-        .progress-bar { width: 100%; height: 10px; background: var(--pale-pink); border-radius: 5px; margin-top: 12px; overflow: hidden; display: none; }
-        .progress-fill { height: 100%; width: 0%; background: var(--hot-pink); }
+        .input-box { width: 100%; padding: 12px; border: 2px solid var(--pale-pink); border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; }
         
-        /* شاشة التشخيص الدقيق بالملي */
-        .debug-console {
-            margin-top: 15px;
-            background: #1a020d;
-            color: #ff85b3;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            text-align: left;
-            direction: ltr;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid var(--hot-pink);
-            display: none;
-            font-family: monospace;
-        }
-        .debug-title { font-weight: bold; color: #fff; margin-bottom: 5px; border-bottom: 1px solid #ff3d8b; padding-bottom: 3px; display: flex; justify-content: space-between; }
-        .error-line { color: #ff4d4d; margin-bottom: 3px; }
-        .success-line { color: #4dff88; margin-bottom: 3px; }
+        .upload-btn { border: 2px dashed var(--hot-pink); background: #fff0f6; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; margin-bottom: 15px; font-weight: bold; color: var(--magenta); }
+
+        .btn-submit { width: 100%; background: var(--hot-pink); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .btn-submit:disabled { background: #ccc; }
+
+        /* شاشة التشخيص بالملي */
+        .debug-box { margin-top: 20px; background: #111; color: #00ff66; padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.75rem; max-height: 180px; overflow-y: auto; text-align: left; direction: ltr; }
+        .err { color: #ff4444; }
     </style>
 </head>
 <body>
 
-<div class="mobile-card">
-    <header>
-        <div class="logo">PURE</div>
-        <div class="subtitle">أداة تجميع الفصول (مع نظام التشخيص الدقيق)</div>
-    </header>
+<div class="card">
+    <h2>PURE ZIP GENERATOR</h2>
 
-    <div class="input-group">
-        <input type="text" id="zipName" placeholder="اسم ملف الـ ZIP (مثلاً: Ch_01_PURE)">
+    <input type="text" id="zipName" class="input-box" placeholder="اسم الملف (مثال: Ch_01_PURE)">
+
+    <div class="upload-btn" onclick="document.getElementById('fileInput').click()">
+        📁 اضغط لاختيار الصور (من الملفات مباشرة)
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="loadFilesDirectly(this.files)">
     </div>
 
-    <div class="toggle-group">
-        <div class="toggle-item">
-            <span>تسمية تسلسلية (001, 002...)</span>
-            <label class="switch">
-                <input type="checkbox" id="renameFiles" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
-    </div>
+    <div id="stats" style="text-align:center; margin-bottom:15px; font-weight:bold;">الصور بالذاكرة: 0</div>
 
-    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-        <div class="drop-text">📂 اضغط هنا لاختيار صور الفصل</div>
-        <div class="drop-subtext">سيتم فحص كل صورة وتسجيل السبب بدقة عند حدوث أي خطأ</div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleRAMFiles(this.files)">
-    </div>
+    <button class="btn-submit" id="mainBtn" onclick="buildZip()" disabled>توليد وحفظ ملف ZIP 💖</button>
 
-    <div class="stats-bar" id="statsBar">لم يتم اختيار أي صور</div>
-
-    <button class="btn-submit" id="submitBtn" onclick="generateZipFromRAM()" disabled>
-        توليد وتنزيل ملف ZIP 💖
-    </button>
-
-    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-    
-    <!-- لوحة التشخيص الحية -->
-    <div class="debug-console" id="debugConsole">
-        <div class="debug-title"><span>Live Error Debugger</span><span>[Active]</span></div>
-        <div id="debugLogs"></div>
+    <div class="debug-box" id="debugConsole">
+        <div>[SYSTEM READY] - بانتظار اختيار الصور...</div>
     </div>
 </div>
 
 <script>
-    let virtualRAM = [];
+    let ramStorage = [];
 
-    function logDebug(message, isError = false) {
+    function log(msg, isError = false) {
         const consoleBox = document.getElementById('debugConsole');
-        const logsBox = document.getElementById('debugLogs');
-        consoleBox.style.display = 'block';
-        
         const time = new Date().toLocaleTimeString();
-        const className = isError ? 'error-line' : 'success-line';
-        logsBox.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+        consoleBox.innerHTML += `<div class="${isError ? 'err' : ''}">[${time}] ${msg}</div>`;
         consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
-    async function handleRAMFiles(files) {
+    async function loadFilesDirectly(files) {
         if (!files || files.length === 0) return;
-        
-        document.getElementById('debugLogs').innerHTML = '';
-        virtualRAM = [];
-        let totalSize = 0;
-        
-        const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-        validFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-        logDebug(`بدء معالجة وفحص عدد (${validFiles.length}) ملف مدخل.`);
+        ramStorage = [];
+        document.getElementById('debugConsole').innerHTML = '<div>[START LOADING]</div>';
+        log(`تم اختيار ${files.length} ملف. جاري تحويلها للذاكرة...`);
 
-        for (let i = 0; i < validFiles.length; i++) {
-            const file = validFiles[i];
+        const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+        fileArray.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+        for (let i = 0; i < fileArray.length; i++) {
+            const f = fileArray[i];
             try {
-                // فحص حجم الملف والنوع قبل القراءة
-                if (file.size === 0) {
-                    throw new Error(`الملف فارغ تماماً (حجمه 0 بايت).`);
-                }
-                
-                const buffer = await file.arrayBuffer();
-                virtualRAM.push({
-                    name: file.name,
-                    ext: file.name.split('.').pop() || 'jpg',
-                    data: new Uint8Array(buffer)
+                // القراءة المباشرة للبايتات لمنع حظر أندرويد
+                const buffer = await f.arrayBuffer();
+                if (buffer.byteLength === 0) throw new Error("الملف فارغ 0 بايت");
+
+                ramStorage.push({
+                    name: `${String(i + 1).padStart(3, '0')}.${f.name.split('.').pop() || 'jpg'}`,
+                    bytes: new Uint8Array(buffer)
                 });
-                totalSize += buffer.byteLength;
-                
-            } catch (err) {
-                // هنا نسجل السبب بالملي ليش فشل الملف
-                logDebug(`خطأ في الملف [${file.name}] ترتيب رقم ${i+1}: السبب -> ${err.message} (الكود التقني: ${err.name || 'Unknown'})`, true);
+                log(`✓ تم تحميل الصورة ${i + 1}: ${f.name} (${(buffer.byteLength / 1024).toFixed(1)} KB)`);
+            } catch (error) {
+                log(`✕ فشل قراءة الصورة ${i + 1} (${f.name}): ${error.message}`, true);
             }
         }
 
-        let sizeMB = totalSize / (1024 * 1024);
-        document.getElementById('statsBar').innerText = `جاهز بالذاكرة: ${virtualRAM.length} صورة | الحجم: ~${sizeMB.toFixed(1)}MB`;
-        document.getElementById('submitBtn').disabled = virtualRAM.length === 0;
-        
-        logDebug(`اكتمل التحميل في الذاكرة بنجاح. الصور الجاهزة للضغط: ${virtualRAM.length}`);
+        document.getElementById('stats').innerText = `الصور الجاهزة بالذاكرة: ${ramStorage.length} من أصل ${fileArray.length}`;
+        document.getElementById('mainBtn').disabled = ramStorage.length === 0;
+        log(`[SUCCESS] اكتمل التحميل. الصور الجاهزة للضغط: ${ramStorage.length}`);
     }
 
-    async function generateZipFromRAM() {
-        if (virtualRAM.length === 0) return alert('ماكو صور مخزنة بالذاكرة!');
+    function buildZip() {
+        if (ramStorage.length === 0) return;
 
-        const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
-        const shouldRename = document.getElementById('renameFiles').checked;
-        const btn = document.getElementById('submitBtn');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
-
+        const zipName = document.getElementById('zipName').value.trim() || 'PURE_Chapter';
+        const btn = document.getElementById('mainBtn');
         btn.disabled = true;
-        progressBar.style.display = 'block';
-        progressFill.style.width = '25%';
-        logDebug(`بدء عملية توليد أرشيف ZIP باسم: ${zipName}.zip`);
 
-        try {
-            const chunks = {};
-            
-            for (let i = 0; i < virtualRAM.length; i++) {
-                const item = virtualRAM[i];
-                let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${item.ext}` : item.name;
-                
-                // التأكد من أن الـ Uint8Array سليمة وليست تالفة بالذاكرة
-                if (!item.data || item.data.byteLength === 0) {
-                    throw new Error(`البيانات الثنائية لملف ${fileName} فارغة في الذاكرة المؤقتة.`);
-                }
-                
-                chunks[fileName] = [item.data, { level: 0 }];
+        log(`جاري ضغط ${ramStorage.length} ملف وإصدار الـ ZIP...`);
+
+        const zipStructure = {};
+        ramStorage.forEach(item => {
+            zipStructure[item.name] = [item.bytes, { level: 0 }];
+        });
+
+        fflate.zip(zipStructure, { level: 0 }, (err, out) => {
+            if (err) {
+                log(`خطأ أثناء إنشاء ZIP: ${err.message}`, true);
+                btn.disabled = false;
+                return;
             }
 
-            progressFill.style.width = '65%';
-            logDebug(`تم تجهيز جميع الملفات داخل الضحك/الذاكرة، جاري دمجها عبر مكتبة fflate...`);
-
-            fflate.zip(chunks, { level: 0 }, (err, out) => {
-                if (err) {
-                    logDebug(`فشل عملية الضغط النهائية من مكتبة fflate: ${err.message}`, true);
-                    throw err;
-                }
-
-                progressFill.style.width = '100%';
-                logDebug(`تم توليد الأرشيف بنجاح، جاري إرسال ملف التحميل للمتصفح...`);
-
-                const blob = new Blob([out], { type: 'application/zip' });
-                const downloadUrl = URL.createObjectURL(blob);
-                
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.download = `${zipName}.zip`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                setTimeout(() => {
-                    URL.revokeObjectURL(downloadUrl);
-                    btn.disabled = false;
-                    progressBar.style.display = 'none';
-                    logDebug(`اكتملت العملية وتنزيل الملف بنجاح تام.`);
-                }, 1000);
-            });
-
-        } catch (err) {
-            logDebug(`خطأ كارثي أثناء المعالجة بالملي: ${err.message}`, true);
-            alert('حدث خطأ: ' + err.message);
+            log(`تم التوليد بنجاح! جاري التنزيل...`);
+            const blob = new Blob([out], { type: 'application/zip' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${zipName}.zip`;
+            a.click();
             btn.disabled = false;
-            progressBar.style.display = 'none';
-        }
+        });
     }
 </script>
 
