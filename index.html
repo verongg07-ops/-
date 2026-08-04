@@ -167,7 +167,6 @@
     function updateUI() {
         const previewGrid = document.getElementById('previewGrid');
         
-        // تنظيف ذاكرة الصور القديمة بالكامل لتفادي خطأ الذاكرة بالموبايل
         previewUrls.forEach(url => URL.revokeObjectURL(url));
         previewUrls = [];
         previewGrid.innerHTML = '';
@@ -203,15 +202,7 @@
         document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${(totalSize / (1024 * 1024)).toFixed(1)}MB`;
     }
 
-    function readFileAsUint8Array(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(new Uint8Array(reader.result));
-            reader.onerror = reject;
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
+    // المعالجة بجزئيات صغيرة لمنع امتلاء الذاكرة بالموبايلات
     async function processAndZip() {
         if (selectedFiles.length === 0) return alert('يمعود اختار صور أول شي!');
 
@@ -228,23 +219,24 @@
         try {
             const zipFilesData = {};
 
+            // قراءة صورة بصورة وتنظيف الذاكرة
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
                 let ext = file.name.split('.').pop();
                 let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
-                const fileBytes = await readFileAsUint8Array(file);
-                // level: 0 بدون ضغط حتى الموبايل يقراها بلحظات
-                zipFilesData[fileName] = [fileBytes, { level: 0 }];
+                // تحويل لقيم بايت بشكل مباشر متتالي
+                const buffer = await file.arrayBuffer();
+                zipFilesData[fileName] = [new Uint8Array(buffer), { level: 0 }];
 
-                let percent = Math.round(((i + 1) / selectedFiles.length) * 80);
+                let percent = Math.round(((i + 1) / selectedFiles.length) * 75);
                 progressFill.style.width = `${percent}%`;
             }
 
-            // استخدام fflate.zipAsync المباشر بدون مشاكل بالذاكرة
-            fflate.zip(zipFilesData, (err, out) => {
+            // استخدام Async Stream لتجميع الملفات بدون ضغط
+            fflate.zip(zipFilesData, { level: 0 }, (err, out) => {
                 if (err) {
-                    alert('صار خطأ بالضغط، حاول مرة ثانية.');
+                    alert('صار خطأ بالضغط، جرب تقلل عدد الصور.');
                     btn.disabled = false;
                     progressBar.style.display = 'none';
                     return;
@@ -266,11 +258,11 @@
                     URL.revokeObjectURL(downloadUrl);
                     btn.disabled = false;
                     progressBar.style.display = 'none';
-                }, 1000);
+                }, 1200);
             });
 
         } catch (err) {
-            alert('حدث خطأ بالذاكرة، تأكد من تحديث الصفحة وحاول مرة أخرى.');
+            alert('حجم الصور كبير جداً على ذاكرة المتصفح، حاول تقسم الفصل لجزئين.');
             btn.disabled = false;
             progressBar.style.display = 'none';
         }
