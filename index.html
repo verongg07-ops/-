@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PURE - أداة ضغط فصول المانجا</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    
+    <title>PURE - أداة ضغط وتجهيز الفصول</title>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
     <style>
         :root {
             --white: #ffffff;
@@ -17,23 +18,14 @@
             --ink: #4a0b2c;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-        }
-
-        html, body {
-            min-height: 100vh;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        html, body { min-height: 100vh; }
 
         body {
             background-color: #fff;
             background-image:
                 repeating-linear-gradient(45deg, transparent, transparent 38px, var(--grid-line) 38px, var(--grid-line) 39px),
-                repeating-linear-gradient(-45deg, transparent, transparent 38px, var(--grid-line) 38px, var(--grid-line) 39px);
+                repeating-linear-gradient(-45deg, transparent, transparent 38px, var(--grid-line) 39px);
             color: var(--ink);
             display: flex;
             justify-content: center;
@@ -44,38 +36,11 @@
             overflow-x: hidden;
         }
 
-        /* ---- Scattered torn-shard decoration, matching the poster's shattered-paper energy ---- */
-        .shard {
-            position: fixed;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.9;
-        }
-        .shard-1 {
-            top: -60px; left: -40px; width: 260px; height: 260px;
-            background: var(--hot-pink);
-            clip-path: polygon(0 0, 70% 0, 100% 40%, 55% 100%, 0 70%);
-            opacity: 0.85;
-        }
-        .shard-2 {
-            top: 8%; right: -80px; width: 300px; height: 220px;
-            background: var(--deep-pink);
-            clip-path: polygon(100% 0, 100% 100%, 20% 100%, 0 30%, 60% 0);
-        }
-        .shard-3 {
-            bottom: -70px; left: 6%; width: 220px; height: 220px;
-            background: var(--pale-pink);
-            clip-path: polygon(20% 0, 100% 10%, 80% 100%, 0 90%);
-        }
-        .shard-4 {
-            bottom: -40px; right: 4%; width: 240px; height: 180px;
-            background: var(--hot-pink);
-            clip-path: polygon(0 20%, 60% 0, 100% 60%, 40% 100%, 0 80%);
-            opacity: 0.5;
-        }
-        @media (max-width: 700px) {
-            .shard { transform: scale(0.6); }
-        }
+        .shard { position: fixed; pointer-events: none; z-index: 0; opacity: 0.9; }
+        .shard-1 { top: -60px; left: -40px; width: 260px; height: 260px; background: var(--hot-pink); clip-path: polygon(0 0, 70% 0, 100% 40%, 55% 100%, 0 70%); opacity: 0.85; }
+        .shard-2 { top: 8%; right: -80px; width: 300px; height: 220px; background: var(--deep-pink); clip-path: polygon(100% 0, 100% 100%, 20% 100%, 0 30%, 60% 0); }
+        .shard-3 { bottom: -70px; left: 6%; width: 220px; height: 220px; background: var(--pale-pink); clip-path: polygon(20% 0, 100% 10%, 80% 100%, 0 90%); }
+        .shard-4 { bottom: -40px; right: 4%; width: 240px; height: 180px; background: var(--hot-pink); clip-path: polygon(0 20%, 60% 0, 100% 60%, 40% 100%, 0 80%); opacity: 0.5; }
 
         .mobile-card {
             position: relative;
@@ -89,308 +54,77 @@
             border: 3px solid var(--pale-pink);
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 22px;
-            position: relative;
-        }
-
-        /* ---- Bubble logo, layered pink tones like the poster wordmark ---- */
-        .logo {
-            font-size: 3.2rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
-            gap: 2px;
-            position: relative;
-        }
-        .logo span {
-            display: inline-block;
-            -webkit-text-stroke: 2px var(--magenta);
-        }
+        header { text-align: center; margin-bottom: 22px; }
+        .logo { font-size: 3.2rem; font-weight: 900; letter-spacing: 2px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; gap: 2px; }
+        .logo span { display: inline-block; -webkit-text-stroke: 2px var(--magenta); }
         .logo .l1 { color: var(--pale-pink); }
         .logo .l2 { color: var(--hot-pink); transform: translateY(-2px); }
         .logo .l3 { color: var(--deep-pink); transform: translateY(2px); }
         .logo .l4 { color: var(--hot-pink); }
+        .logo-eye { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--ink) 0 5px, var(--hot-pink) 6px 12px, transparent 13px); border: 2px solid var(--magenta); display: inline-block; }
+        .subtitle { font-size: 1.05rem; font-weight: 700; color: var(--deep-pink); margin-top: 4px; }
 
-        /* small eye-swirl accent tucked into the wordmark, echoing the poster's motif */
-        .logo-eye {
-            display: inline-block;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, var(--ink) 0 5px, var(--hot-pink) 6px 12px, transparent 13px);
-            border: 2px solid var(--magenta);
-            vertical-align: middle;
-            margin: 0 2px;
-            position: relative;
-            top: -4px;
-        }
+        .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
+        .social-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: white; }
+        .tiktok { background: #000; } .discord { background: #5865F2; }
 
-        .subtitle {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--deep-pink);
-            margin-top: 2px;
-        }
+        .input-group { margin-bottom: 15px; }
+        input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid var(--pale-pink); border-radius: 14px; outline: none; font-size: 0.95rem; color: var(--ink); background: #fff; text-align: center; font-weight: 700; }
 
-        .section-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--magenta);
-            margin-bottom: 8px;
-        }
+        .toggle-group { background: var(--pale-pink); padding: 12px 16px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #ffc3e0; }
+        .toggle-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--magenta); }
 
-        .input-group {
-            margin-bottom: 18px;
-        }
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f3b8d3; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--hot-pink); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--pale-pink);
-            border-radius: 14px;
-            outline: none;
-            font-size: 0.95rem;
-            color: var(--ink);
-            background: #fff;
-            transition: all 0.2s;
-        }
+        .drop-zone { border: 2.5px dashed var(--hot-pink); background: #fff8fb; border-radius: 18px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 18px; }
+        .drop-icon { font-size: 2.2rem; }
+        .drop-text { font-size: 0.95rem; font-weight: 700; color: var(--magenta); margin-top: 4px; }
+        .drop-subtext { font-size: 0.75rem; color: var(--deep-pink); opacity: 0.8; }
 
-        input[type="text"]:focus {
-            border-color: var(--hot-pink);
-            box-shadow: 0 0 0 4px rgba(255, 61, 139, 0.15);
-        }
+        .preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 160px; overflow-y: auto; margin-bottom: 18px; }
+        .preview-item { position: relative; width: 100%; height: 75px; border-radius: 10px; overflow: hidden; border: 2px solid var(--pale-pink); }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-item .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(157, 10, 82, 0.85); color: white; border: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; cursor: pointer; }
 
-        .toggle-group {
-            background: var(--pale-pink);
-            padding: 12px 16px;
-            border-radius: 16px;
-            margin-bottom: 18px;
-            border: 1px solid #ffc3e0;
-        }
+        .stats-bar { background: var(--pale-pink); padding: 10px; border-radius: 12px; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--magenta); margin-bottom: 16px; }
 
-        .toggle-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--magenta);
-        }
+        .btn-submit { width: 100%; background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit:disabled { background: #d8c1cd; cursor: not-allowed; }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #f3b8d3;
-            transition: .3s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--hot-pink);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(22px);
-        }
-
-        .drop-zone {
-            border: 2.5px dashed var(--hot-pink);
-            background: #fff8fb;
-            border-radius: 18px;
-            padding: 25px 15px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 18px;
-            transition: all 0.2s;
-            position: relative;
-            clip-path: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
-        }
-
-        .drop-zone:active {
-            transform: scale(0.98);
-            background: var(--pale-pink);
-        }
-
-        .drop-icon {
-            font-size: 2.2rem;
-            margin-bottom: 6px;
-        }
-
-        .drop-text {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--magenta);
-            margin-bottom: 4px;
-        }
-
-        .drop-subtext {
-            font-size: 0.75rem;
-            color: var(--deep-pink);
-            opacity: 0.8;
-        }
-
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--magenta);
-        }
-
-        .preview-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            max-height: 160px;
-            overflow-y: auto;
-            margin-bottom: 18px;
-            padding-right: 2px;
-        }
-
-        .preview-item {
-            position: relative;
-            width: 100%;
-            height: 75px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid var(--pale-pink);
-        }
-
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .preview-item .remove-btn {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: rgba(157, 10, 82, 0.85);
-            color: white;
-            border: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            font-size: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stats-bar {
-            background: var(--pale-pink);
-            padding: 10px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--magenta);
-            margin-bottom: 16px;
-        }
-
-        .btn-submit {
-            width: 100%;
-            background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(255, 61, 139, 0.35);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-submit:active {
-            transform: scale(0.97);
-        }
-
-        .btn-submit:disabled {
-            background: #d8c1cd;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: var(--pale-pink);
-            border-radius: 3px;
-            margin-top: 10px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--magenta);
-            transition: width 0.1s;
-        }
+        .progress-bar { width: 100%; height: 10px; background: var(--pale-pink); border-radius: 5px; margin-top: 12px; overflow: hidden; display: none; }
+        .progress-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.1s; }
+        
+        #errorConsole { display: none; margin-top: 15px; background: #2a0416; color: #ff9ec7; padding: 10px; border-radius: 10px; font-size: 0.75rem; text-align: left; direction: ltr; word-break: break-all; max-height: 120px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-<div class="shard shard-1"></div>
-<div class="shard shard-2"></div>
-<div class="shard shard-3"></div>
-<div class="shard shard-4"></div>
+<div class="shard shard-1"></div><div class="shard shard-2"></div>
+<div class="shard shard-3"></div><div class="shard shard-4"></div>
 
 <div class="mobile-card">
     <header>
-        <div class="logo">
-            <span class="l1">P</span><span class="l2">U</span><span class="logo-eye"></span><span class="l3">R</span><span class="l4">E</span>
+        <div class="logo"><span class="l1">P</span><span class="l2">U</span><span class="logo-eye"></span><span class="l3">R</span><span class="l4">E</span></div>
+        <div class="subtitle">أداة تجميع وتجهيز الفصول</div>
+        
+        <div class="social-links">
+            <a href="https://tiktok.com" target="_blank" class="social-btn tiktok"><span>🎵</span> TikTok</a>
+            <a href="https://discord.gg" target="_blank" class="social-btn discord"><span>💬</span> Discord</a>
         </div>
-        <div class="subtitle">أداة ضغط فصول المانجا</div>
     </header>
 
-    <div class="section-title">إعدادات الأرشيف</div>
     <div class="input-group">
-        <input type="text" id="zipName" placeholder="اسم مجلد الـ ZIP (مثلاً: Ch_01_PURE)">
+        <input type="text" id="zipName" placeholder="اسم ملف الـ ZIP (مثلاً: Ch_01_PURE)">
     </div>
 
     <div class="toggle-group">
         <div class="toggle-item">
-            <span>تسمية تلقائية (001, 002...)</span>
+            <span>تسمية تسلسلية (001, 002...)</span>
             <label class="switch">
                 <input type="checkbox" id="renameFiles" checked>
                 <span class="slider"></span>
@@ -398,63 +132,48 @@
         </div>
     </div>
 
-    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-        <div class="drop-icon">📁</div>
-        <div class="drop-text">اسحب وإفلت الصور هنا، أو اضغط للاختيار</div>
-        <div class="drop-subtext">تدعم: JPG, PNG, WebP (عدد غير محدود)</div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
-    </div>
-
-    <div class="preview-header">
-        <span>PREVIEW</span>
-        <span id="totalCountText">Total Images: 0</span>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="drop-icon">📂</div>
+        <div class="drop-text">اضغط هنا لاختيار صفحات الفصل</div>
+        <div class="drop-subtext">تجنباً لمشاكل الموبايل، اختر الصور دفعة واحدة</div>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
     </div>
 
     <div class="preview-grid" id="previewGrid"></div>
+    <div class="stats-bar" id="statsBar">عدد الصور: 0 | الحجم: ~0MB</div>
 
-    <div class="stats-bar" id="statsBar">
-        عدد الصور: 0 | الحجم المتوقع: ~0MB
-    </div>
-
-    <button class="btn-submit" id="submitBtn" onclick="processAndZip()">
+    <button class="btn-submit" id="submitBtn" onclick="processAndZipStable()">
         <span>توليد وتنزيل ملف ZIP</span>
         <span>💖</span>
     </button>
 
-    <div class="progress-bar" id="progressBar">
-        <div class="progress-fill" id="progressFill"></div>
-    </div>
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="errorConsole"></div>
 </div>
 
 <script>
-    const fileInput = document.getElementById('fileInput');
-    const previewGrid = document.getElementById('previewGrid');
-    const statsBar = document.getElementById('statsBar');
-    const totalCountText = document.getElementById('totalCountText');
-    const submitBtn = document.getElementById('submitBtn');
-    const progressBar = document.getElementById('progressBar');
-    const progressFill = document.getElementById('progressFill');
-
     let selectedFiles = [];
 
-    fileInput.addEventListener('change', (e) => {
-        const newFiles = Array.from(e.target.files);
+    function handleFiles(files) {
+        const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+        newFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
         selectedFiles = selectedFiles.concat(newFiles);
         updateUI();
-    });
+    }
 
     function updateUI() {
+        const previewGrid = document.getElementById('previewGrid');
         previewGrid.innerHTML = '';
         let totalSize = 0;
 
         selectedFiles.forEach((file, index) => {
             totalSize += file.size;
-
             const item = document.createElement('div');
             item.className = 'preview-item';
-
+            
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
+            img.onload = () => URL.revokeObjectURL(img.src);
 
             const removeBtn = document.createElement('button');
             removeBtn.className = 'remove-btn';
@@ -470,56 +189,82 @@
             previewGrid.appendChild(item);
         });
 
-        const sizeInMB = (totalSize / (1024 * 1024)).toFixed(1);
-        totalCountText.innerText = `Total Images: ${selectedFiles.length}`;
-        statsBar.innerText = `عدد الصور: ${selectedFiles.length} | الحجم المتوقع: ~${sizeInMB}MB`;
+        let sizeMB = totalSize / (1024 * 1024);
+        document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${isNaN(sizeMB) ? 0 : sizeMB.toFixed(1)}MB`;
     }
 
-    async function processAndZip() {
-        if (selectedFiles.length === 0) {
-            alert('يمعود اختار صور أول شي!');
-            return;
-        }
+    async function processAndZipStable() {
+        if (selectedFiles.length === 0) return alert('يمعود اختار صور الفصل أول شي!');
 
-        const zipNameInput = document.getElementById('zipName').value.trim();
-        const zipName = zipNameInput || 'Ch_01_PURE';
+        const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
         const shouldRename = document.getElementById('renameFiles').checked;
+        const btn = document.getElementById('submitBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const consoleBox = document.getElementById('errorConsole');
 
-        submitBtn.disabled = true;
+        consoleBox.style.display = 'none';
+        consoleBox.innerHTML = '';
+        btn.disabled = true;
         progressBar.style.display = 'block';
         progressFill.style.width = '0%';
 
-        const zip = new JSZip();
-        const folder = zip.folder(zipName);
+        try {
+            const chunks = {};
+            const total = selectedFiles.length;
 
-        for (let i = 0; i < selectedFiles.length; i++) {
-            const file = selectedFiles[i];
-            let blob = file;
-            let ext = file.name.split('.').pop();
+            for (let i = 0; i < total; i++) {
+                const file = selectedFiles[i];
+                let ext = file.name.split('.').pop() || 'jpg';
+                let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
-            let fileName = file.name;
-            if (shouldRename) {
-                fileName = `${String(i + 1).padStart(3, '0')}.${ext}`;
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    chunks[fileName] = [new Uint8Array(arrayBuffer), { level: 0 }];
+                } catch (readErr) {
+                    consoleBox.style.display = 'block';
+                    consoleBox.innerHTML += `تخطي الملف ${fileName}: ${readErr.message}<br>`;
+                }
+
+                let percent = Math.round(((i + 1) / total) * 90);
+                progressFill.style.width = `${percent}%`;
+
+                if (i % 15 === 0) {
+                    await new Promise(r => setTimeout(r, 10));
+                }
             }
 
-            folder.file(fileName, blob);
+            if (Object.keys(chunks).length === 0) {
+                throw new Error('عذراً، لم يتم العثور على أي ملف صالح للضغط.');
+            }
 
-            const percent = Math.round(((i + 1) / selectedFiles.length) * 50);
-            progressFill.style.width = `${percent}%`;
-        }
+            fflate.zip(chunks, { level: 0 }, (err, out) => {
+                if (err) throw err;
 
-        const zipContent = await zip.generateAsync({ type: "blob" }, (metadata) => {
-            const percent = 50 + Math.round(metadata.percent / 2);
-            progressFill.style.width = `${percent}%`;
-        });
+                progressFill.style.width = '100%';
+                const blob = new Blob([out], { type: 'application/zip' });
+                const downloadUrl = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `${zipName}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
 
-        saveAs(zipContent, `${zipName}.zip`);
+                setTimeout(() => {
+                    URL.revokeObjectURL(downloadUrl);
+                    btn.disabled = false;
+                    progressBar.style.display = 'none';
+                }, 1000);
+            });
 
-        submitBtn.disabled = false;
-        setTimeout(() => {
+        } catch (uploadErr) {
+            consoleBox.style.display = 'block';
+            consoleBox.innerHTML += `<b>Error:</b> ${uploadErr.message}`;
+            btn.disabled = false;
             progressBar.style.display = 'none';
-            progressFill.style.width = '0%';
-        }, 1000);
+        }
     }
 </script>
 
