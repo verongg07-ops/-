@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PURE - أداة ضغط وتجهيز الفصول</title>
-    <!-- مكتبة fflate فائقة السرعة والخفيفة على ذاكرة الموبايل -->
+    <!-- محرك fflate القوي والسريع بدون استهلاك ذاكرة الموبايل -->
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
     <style>
         :root {
@@ -74,8 +74,10 @@
         .social-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: white; }
         .tiktok { background: #000; } .discord { background: #5865F2; }
 
-        /* التبديلات والثواير كما في صورة 2 */
-        .toggle-group { background: var(--pale-pink); padding: 12px 16px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #ffc3e0; display: flex; flex-direction: column; gap: 12px; }
+        .input-group { margin-bottom: 15px; }
+        input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid var(--pale-pink); border-radius: 14px; outline: none; font-size: 0.95rem; color: var(--ink); background: #fff; text-align: center; font-weight: 700; }
+
+        .toggle-group { background: var(--pale-pink); padding: 12px 16px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #ffc3e0; }
         .toggle-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--magenta); }
 
         .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
@@ -88,7 +90,7 @@
         .drop-zone { border: 2.5px dashed var(--hot-pink); background: #fff8fb; border-radius: 18px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 18px; }
         .drop-icon { font-size: 2.2rem; }
         .drop-text { font-size: 0.95rem; font-weight: 700; color: var(--magenta); margin-top: 4px; }
-        .drop-subtext { font-size: 0.75rem; color: var(--deep-pink); opacity: 0.8; margin-top: 2px; }
+        .drop-subtext { font-size: 0.75rem; color: var(--deep-pink); opacity: 0.8; }
 
         .preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 160px; overflow-y: auto; margin-bottom: 18px; }
         .preview-item { position: relative; width: 100%; height: 75px; border-radius: 10px; overflow: hidden; border: 2px solid var(--pale-pink); }
@@ -120,7 +122,10 @@
         </div>
     </header>
 
-    <!-- الخيارات الثلاثة نفس صورة رقم 2 بالضبط -->
+    <div class="input-group">
+        <input type="text" id="zipName" placeholder="اسم ملف الـ ZIP (مثلاً: Ch_01_PURE)">
+    </div>
+
     <div class="toggle-group">
         <div class="toggle-item">
             <span>تسمية تسلسلية (001, 002...)</span>
@@ -129,25 +134,11 @@
                 <span class="slider"></span>
             </label>
         </div>
-        <div class="toggle-item">
-            <span>تحويل لـ WebP (قد يسبب بطء للصفحات العملاقة)</span>
-            <label class="switch">
-                <input type="checkbox" id="convertToWebp">
-                <span class="slider"></span>
-            </label>
-        </div>
-        <div class="toggle-item">
-            <span>إضافة شعار الفريق (Watermark)</span>
-            <label class="switch">
-                <input type="checkbox" id="addWatermark">
-                <span class="slider"></span>
-            </label>
-        </div>
     </div>
 
-    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-        <div class="drop-icon">📂</div>
-        <div class="drop-text">اسحب وإفلت الصفحات الطويلة هنا</div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="drop-icon">📁</div>
+        <div class="drop-text">اسحب وإفلت صفحات الفصل هنا</div>
         <div class="drop-subtext">تنزل كاملة بدون تقطيع أو ضياع جودة</div>
         <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
     </div>
@@ -205,47 +196,20 @@
         document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${(totalSize / (1024 * 1024)).toFixed(1)}MB`;
     }
 
-    // معالجة الصور وتحويلها إن طُلِب بدون كراش بالذاكرة
-    async function processImage(file, toWebp, watermark) {
-        if (!toWebp && !watermark) {
-            const buffer = await file.arrayBuffer();
-            return new Uint8Array(buffer);
-        }
-
+    function readFileAsUint8Array(file) {
         return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-
-                if (watermark) {
-                    ctx.font = 'bold 24px Segoe UI';
-                    ctx.fillStyle = 'rgba(255, 61, 139, 0.6)';
-                    ctx.fillText('PURE TEAM', 20, img.height - 30);
-                }
-
-                const mime = toWebp ? 'image/webp' : file.type;
-                canvas.toBlob((blob) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(new Uint8Array(reader.result));
-                    reader.readAsArrayBuffer(blob);
-                }, mime, 0.85);
-            };
-            img.onerror = reject;
-            img.src = URL.createObjectURL(file);
+            const reader = new FileReader();
+            reader.onload = () => resolve(new Uint8Array(reader.result));
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
         });
     }
 
     async function processAndZip() {
         if (selectedFiles.length === 0) return alert('يمعود اختار صور أول شي!');
 
+        const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
         const shouldRename = document.getElementById('renameFiles').checked;
-        const toWebp = document.getElementById('convertToWebp').checked;
-        const watermark = document.getElementById('addWatermark').checked;
-
         const btn = document.getElementById('submitBtn');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
@@ -259,10 +223,10 @@
 
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
-                let ext = toWebp ? 'webp' : file.name.split('.').pop();
+                let ext = file.name.split('.').pop();
                 let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
-                const fileBytes = await processImage(file, toWebp, watermark);
+                const fileBytes = await readFileAsUint8Array(file);
                 zipFilesData[fileName] = [fileBytes, { level: 0 }];
 
                 let percent = Math.round(((i + 1) / selectedFiles.length) * 85);
@@ -281,7 +245,7 @@
                 const blob = new Blob([out], { type: 'application/zip' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `Ch_PURE_${Date.now()}.zip`;
+                link.download = `${zipName}.zip`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -294,7 +258,7 @@
             });
 
         } catch (err) {
-            alert('حدث خطأ أثناء المعالجة، جرب بدون خيار WebP أو قلل الصور.');
+            alert('حدث خطأ بالذاكرة، تأكد من تحديث الصفحة وحاول مرة أخرى.');
             btn.disabled = false;
             progressBar.style.display = 'none';
         }
