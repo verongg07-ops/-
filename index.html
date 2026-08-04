@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    
     <title>PURE - أداة ضغط وتجهيز الفصول</title>
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
     <style>
@@ -18,9 +16,8 @@
             --ink: #4a0b2c;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-        html, body { min-height: 100vh; }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; user-select: none; }
+        
         body {
             background-color: #fff;
             background-image:
@@ -36,255 +33,323 @@
             overflow-x: hidden;
         }
 
+        /* الشظايا الورديّة بالخلفية */
         .shard { position: fixed; pointer-events: none; z-index: 0; opacity: 0.9; }
         .shard-1 { top: -60px; left: -40px; width: 260px; height: 260px; background: var(--hot-pink); clip-path: polygon(0 0, 70% 0, 100% 40%, 55% 100%, 0 70%); opacity: 0.85; }
         .shard-2 { top: 8%; right: -80px; width: 300px; height: 220px; background: var(--deep-pink); clip-path: polygon(100% 0, 100% 100%, 20% 100%, 0 30%, 60% 0); }
         .shard-3 { bottom: -70px; left: 6%; width: 220px; height: 220px; background: var(--pale-pink); clip-path: polygon(20% 0, 100% 10%, 80% 100%, 0 90%); }
         .shard-4 { bottom: -40px; right: 4%; width: 240px; height: 180px; background: var(--hot-pink); clip-path: polygon(0 20%, 60% 0, 100% 60%, 40% 100%, 0 80%); opacity: 0.5; }
 
-        .mobile-card {
+        .card {
             position: relative;
             z-index: 1;
             width: 100%;
             max-width: 420px;
             background: #ffffff;
             border-radius: 26px;
-            padding: 26px 24px;
-            box-shadow: 0 24px 50px rgba(157, 10, 82, 0.18);
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(157, 10, 82, 0.15);
             border: 3px solid var(--pale-pink);
         }
 
-        header { text-align: center; margin-bottom: 22px; }
-        .logo { font-size: 3.2rem; font-weight: 900; letter-spacing: 2px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; gap: 2px; }
-        .logo span { display: inline-block; -webkit-text-stroke: 2px var(--magenta); }
-        .logo .l1 { color: var(--pale-pink); }
-        .logo .l2 { color: var(--hot-pink); transform: translateY(-2px); }
-        .logo .l3 { color: var(--deep-pink); transform: translateY(2px); }
-        .logo .l4 { color: var(--hot-pink); }
-        .logo-eye { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--ink) 0 5px, var(--hot-pink) 6px 12px, transparent 13px); border: 2px solid var(--magenta); display: inline-block; }
-        .subtitle { font-size: 1.05rem; font-weight: 700; color: var(--deep-pink); margin-top: 4px; }
-
-        .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
-        .social-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: white; }
-        .tiktok { background: #000; } .discord { background: #5865F2; }
-
-        .input-group { margin-bottom: 15px; }
-        input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid var(--pale-pink); border-radius: 14px; outline: none; font-size: 0.95rem; color: var(--ink); background: #fff; text-align: center; font-weight: 700; }
-
-        .toggle-group { background: var(--pale-pink); padding: 12px 16px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #ffc3e0; }
-        .toggle-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--magenta); }
-
-        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f3b8d3; transition: .3s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--hot-pink); }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        .drop-zone { border: 2.5px dashed var(--hot-pink); background: #fff8fb; border-radius: 18px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 18px; }
-        .drop-icon { font-size: 2.2rem; }
-        .drop-text { font-size: 0.95rem; font-weight: 700; color: var(--magenta); margin-top: 4px; }
-        .drop-subtext { font-size: 0.75rem; color: var(--deep-pink); opacity: 0.8; }
-
-        .preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 160px; overflow-y: auto; margin-bottom: 18px; }
-        .preview-item { position: relative; width: 100%; height: 75px; border-radius: 10px; overflow: hidden; border: 2px solid var(--pale-pink); }
-        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
-        .preview-item .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(157, 10, 82, 0.85); color: white; border: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; cursor: pointer; }
-
-        .stats-bar { background: var(--pale-pink); padding: 10px; border-radius: 12px; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--magenta); margin-bottom: 16px; }
-
-        .btn-submit { width: 100%; background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-submit:disabled { background: #d8c1cd; cursor: not-allowed; }
-
-        .progress-bar { width: 100%; height: 10px; background: var(--pale-pink); border-radius: 5px; margin-top: 12px; overflow: hidden; display: none; }
-        .progress-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.1s; }
-        
-        .debug-console {
-            margin-top: 15px;
-            background: #1a020d;
-            color: #ff85b3;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            text-align: left;
-            direction: ltr;
-            max-height: 120px;
-            overflow-y: auto;
-            border: 1px solid var(--hot-pink);
-            display: none;
-            font-family: monospace;
+        .input-group { margin-bottom: 12px; }
+        input[type="text"] { 
+            width: 100%; 
+            padding: 14px; 
+            border: 2px solid var(--pale-pink); 
+            border-radius: 16px; 
+            outline: none; 
+            font-size: 0.95rem; 
+            color: var(--ink); 
+            background: #fff; 
+            text-align: center; 
+            font-weight: 700; 
         }
-        .debug-title { font-weight: bold; color: #fff; margin-bottom: 5px; border-bottom: 1px solid #ff3d8b; padding-bottom: 3px; display: flex; justify-content: space-between; }
-        .error-line { color: #ff4d4d; margin-bottom: 3px; }
-        .success-line { color: #4dff88; margin-bottom: 3px; }
+
+        /* شريط التسمية التسلسلية */
+        .toggle-group { 
+            background: var(--pale-pink); 
+            padding: 12px 18px; 
+            border-radius: 18px; 
+            margin-bottom: 16px; 
+            border: 1px solid #ffc3e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .toggle-label { font-size: 0.9rem; font-weight: 700; color: var(--magenta); }
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f3b8d3; transition: .3s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--hot-pink); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* منطقة الإسقاط */
+        .drop-zone { 
+            border: 2.5px dashed var(--hot-pink); 
+            background: #fff8fb; 
+            border-radius: 20px; 
+            padding: 20px 15px; 
+            text-align: center; 
+            cursor: pointer; 
+            margin-bottom: 16px; 
+        }
+        .drop-icon { font-size: 2.5rem; margin-bottom: 6px; }
+        .drop-text { font-size: 1.05rem; font-weight: 800; color: var(--magenta); }
+        .drop-subtext { font-size: 0.8rem; color: var(--deep-pink); opacity: 0.8; margin-top: 4px; }
+
+        /* شبكة معاينة الصور */
+        .preview-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 8px; 
+            max-height: 180px; 
+            overflow-y: auto; 
+            margin-bottom: 16px; 
+            padding: 2px;
+        }
+        .preview-item { 
+            position: relative; 
+            width: 100%; 
+            height: 80px; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            border: 2px solid var(--pale-pink); 
+        }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-item .remove-btn { 
+            position: absolute; 
+            top: 3px; 
+            right: 3px; 
+            background: var(--magenta); 
+            color: white; 
+            border: none; 
+            width: 20px; 
+            height: 20px; 
+            border-radius: 50%; 
+            font-size: 11px; 
+            font-weight: bold;
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* شريط الإحصائيات */
+        .stats-bar { 
+            background: var(--pale-pink); 
+            padding: 12px; 
+            border-radius: 14px; 
+            text-align: center; 
+            font-size: 0.9rem; 
+            font-weight: 800; 
+            color: var(--magenta); 
+            margin-bottom: 16px; 
+        }
+
+        /* زر التوليد الوردي الكبير */
+        .btn-submit { 
+            width: 100%; 
+            background: linear-gradient(135deg, #ff3d8b 0%, #a80954 100%); 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 16px; 
+            font-size: 1.15rem; 
+            font-weight: 800; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 8px 20px rgba(255, 61, 139, 0.3);
+        }
+        .btn-submit:disabled { background: #d8c1cd; box-shadow: none; cursor: not-allowed; }
+
+        /* الشاشة السوداء المدمجة */
+        .debug-box { 
+            margin-top: 15px; 
+            background: #12020a; 
+            color: #ff85b3; 
+            padding: 12px; 
+            border-radius: 14px; 
+            font-family: monospace; 
+            font-size: 0.75rem; 
+            max-height: 130px; 
+            overflow-y: auto; 
+            text-align: left; 
+            direction: ltr; 
+            border: 1px solid var(--hot-pink);
+        }
+        .err { color: #ff4d4d; }
+        .suc { color: #4dff88; }
     </style>
 </head>
 <body>
 
-<div class="shard shard-1"></div><div class="shard shard-2"></div>
-<div class="shard shard-3"></div><div class="shard shard-4"></div>
+<div class="shard shard-1"></div>
+<div class="shard shard-2"></div>
+<div class="shard shard-3"></div>
+<div class="shard shard-4"></div>
 
-<div class="mobile-card">
-    <header>
-        <div class="logo"><span class="l1">E</span><span class="l2">R</span><span class="logo-eye"></span><span class="l3">O</span><span class="l4">UP</span></div>
-        <div class="subtitle">أداة تجميع وتجهيز الفصول</div>
-        
-        <div class="social-links">
-            <a href="https://tiktok.com" target="_blank" class="social-btn tiktok"><span>🎵</span> TikTok</a>
-            <a href="https://discord.gg" target="_blank" class="social-btn discord"><span>💬</span> Discord</a>
-        </div>
-    </header>
-
+<div class="card">
     <div class="input-group">
-        <input type="text" id="zipName" placeholder="اسم ملف الـ ZIP (مثلاً: Ch_01_PURE)">
+        <input type="text" id="zipName" placeholder="اسم الملف (مثال: Ch_01_PURE)">
     </div>
 
     <div class="toggle-group">
-        <div class="toggle-item">
-            <span>تسمية تسلسلية (001, 002...)</span>
-            <label class="switch">
-                <input type="checkbox" id="renameFiles" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
+        <span class="toggle-label">تسمية تسلسلية (001, 002...)</span>
+        <label class="switch">
+            <input type="checkbox" id="renameFiles" checked>
+            <span class="slider"></span>
+        </label>
     </div>
 
     <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
-        <div class="drop-icon">📂</div>
-        <div class="drop-text">اضغط هنا لاختيار صور الفصل</div>
-        <div class="drop-subtext">تتم المعالجة بالذاكرة فوراً وبدون أي تقطيع</div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleRAMFiles(this.files)">
+        <div class="drop-icon">📁</div>
+        <div class="drop-text">اسحب وإفلت صفحات الفصل هنا</div>
+        <div class="drop-subtext">تنزل كاملة بدون تقطيع أو ضياع جودة</div>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="loadFilesDirectly(this.files)">
     </div>
 
     <div class="preview-grid" id="previewGrid"></div>
-    <div class="stats-bar" id="statsBar">عدد الصور: 0 | الحجم: ~0MB</div>
 
-    <button class="btn-submit" id="submitBtn" onclick="generateZipFromRAM()" disabled>
-        <span>توليد وتنزيل ملف ZIP</span>
-        <span>💖</span>
+    <div class="stats-bar" id="stats">عدد الصور: 0 | الحجم: ~0MB</div>
+
+    <button class="btn-submit" id="mainBtn" onclick="buildZip()" disabled>
+        <span>توليد وتنزيل ملف ZIP</span> 💖
     </button>
 
-    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-    
-    <div class="debug-console" id="debugConsole">
-        <div class="debug-title"><span>Live Error Debugger</span><span>[Active]</span></div>
-        <div id="debugLogs"></div>
+    <div class="debug-box" id="debugConsole">
+        <div class="suc">[SYSTEM READY] - بانتظار اختيار الصور...</div>
     </div>
 </div>
 
 <script>
     let ramStorage = [];
 
-    function logDebug(message, isError = false) {
+    function log(msg, isError = false) {
         const consoleBox = document.getElementById('debugConsole');
-        const logsBox = document.getElementById('debugLogs');
-        consoleBox.style.display = 'block';
-        
         const time = new Date().toLocaleTimeString();
-        const className = isError ? 'error-line' : 'success-line';
-        logsBox.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+        consoleBox.innerHTML += `<div class="${isError ? 'err' : 'suc'}">[${time}] ${msg}</div>`;
         consoleBox.scrollTop = consoleBox.scrollHeight;
     }
 
-    async function handleRAMFiles(files) {
+    async function loadFilesDirectly(files) {
         if (!files || files.length === 0) return;
-        
-        document.getElementById('debugLogs').innerHTML = '';
+
         ramStorage = [];
-        let totalSize = 0;
-        
-        const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-        validFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-
-        logDebug(`بدء معالجة وفحص عدد (${validFiles.length}) ملف مدخل.`);
-
         const previewGrid = document.getElementById('previewGrid');
         previewGrid.innerHTML = '';
+        document.getElementById('debugConsole').innerHTML = '';
+        
+        log(`تم اختيار ${files.length} ملف. جاري التحميل المباشر...`);
 
-        for (let i = 0; i < validFiles.length; i++) {
-            const file = validFiles[i];
+        const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+        fileArray.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+        let totalSizeBytes = 0;
+
+        for (let i = 0; i < fileArray.length; i++) {
+            const f = fileArray[i];
             try {
-                if (file.size === 0) throw new Error(`الملف فارغ (0 بايت).`);
-                
-                const buffer = await file.arrayBuffer();
+                const buffer = await f.arrayBuffer();
+                if (buffer.byteLength === 0) throw new Error("الملف فارغ");
+
+                totalSizeBytes += buffer.byteLength;
+                const blobUrl = URL.createObjectURL(f);
+
                 ramStorage.push({
-                    name: file.name,
-                    ext: file.name.split('.').pop() || 'jpg',
+                    originalName: f.name,
+                    ext: f.name.split('.').pop() || 'jpg',
                     bytes: new Uint8Array(buffer),
-                    blobUrl: URL.createObjectURL(file)
+                    blobUrl: blobUrl
                 });
-                totalSize += buffer.byteLength;
-                
-                // عرض الصورة مصغرة للتصميم
+
+                // إضافة المعاينة
                 const item = document.createElement('div');
                 item.className = 'preview-item';
-                const img = document.createElement('img');
-                img.src = ramStorage[i].blobUrl;
-                item.appendChild(img);
+                item.innerHTML = `
+                    <img src="${blobUrl}">
+                    <button class="remove-btn" onclick="removeImage(${ramStorage.length - 1})">✕</button>
+                `;
                 previewGrid.appendChild(item);
 
-            } catch (err) {
-                logDebug(`خطأ بالملف [${file.name}]: ${err.message}`, true);
+            } catch (error) {
+                log(`✕ خطأ بالصورة [${f.name}]: ${error.message}`, true);
             }
         }
 
-        let sizeMB = totalSize / (1024 * 1024);
-        document.getElementById('statsBar').innerText = `جاهز بالذاكرة: ${ramStorage.length} صورة | الحجم: ~${sizeMB.toFixed(1)}MB`;
-        document.getElementById('submitBtn').disabled = ramStorage.length === 0;
-        
-        logDebug(`اكتمل التحميل في الذاكرة بنجاح. الصور الجاهزة: ${ramStorage.length}`);
+        updateStats(totalSizeBytes);
+        document.getElementById('mainBtn').disabled = ramStorage.length === 0;
+        log(`اكتمل الجلب بنجاح. الصور الجاهزة: ${ramStorage.length}`);
     }
 
-    function generateZipFromRAM() {
+    function removeImage(index) {
+        ramStorage.splice(index, 1);
+        renderPreview();
+    }
+
+    function renderPreview() {
+        const previewGrid = document.getElementById('previewGrid');
+        previewGrid.innerHTML = '';
+        let totalSizeBytes = 0;
+
+        ramStorage.forEach((item, i) => {
+            totalSizeBytes += item.bytes.byteLength;
+            const elem = document.createElement('div');
+            elem.className = 'preview-item';
+            elem.innerHTML = `
+                <img src="${item.blobUrl}">
+                <button class="remove-btn" onclick="removeImage(${i})">✕</button>
+            `;
+            previewGrid.appendChild(elem);
+        });
+
+        updateStats(totalSizeBytes);
+        document.getElementById('mainBtn').disabled = ramStorage.length === 0;
+    }
+
+    function updateStats(totalBytes) {
+        const sizeMB = (totalBytes / (1024 * 1024)).toFixed(1);
+        document.getElementById('stats').innerText = `عدد الصور: ${ramStorage.length} | الحجم: ~${sizeMB}MB`;
+    }
+
+    function buildZip() {
         if (ramStorage.length === 0) return;
 
         const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
         const shouldRename = document.getElementById('renameFiles').checked;
-        const btn = document.getElementById('submitBtn');
-        const progressBar = document.getElementById('progressBar');
-        const progressFill = document.getElementById('progressFill');
-
+        const btn = document.getElementById('mainBtn');
         btn.disabled = true;
-        progressBar.style.display = 'block';
-        progressFill.style.width = '30%';
-        logDebug(`بذء عملية ضغط ملف: ${zipName}.zip`);
 
-        const chunks = {};
+        log(`جاري ضغط ${ramStorage.length} صورة إلى ${zipName}.zip...`);
+
+        const zipStructure = {};
         ramStorage.forEach((item, i) => {
-            let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${item.ext}` : item.name;
-            chunks[fileName] = [item.bytes, { level: 0 }];
+            const finalName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${item.ext}` : item.originalName;
+            zipStructure[finalName] = [item.bytes, { level: 0 }];
         });
 
-        progressFill.style.width = '70%';
-        logDebug(`تم تجهيز الملفات بالذاكرة، جاري الدمج بـ fflate...`);
-
-        fflate.zip(chunks, { level: 0 }, (err, out) => {
+        fflate.zip(zipStructure, { level: 0 }, (err, out) => {
             if (err) {
-                logDebug(`فشل الضغط: ${err.message}`, true);
+                log(`خطأ أثناء الضغط: ${err.message}`, true);
                 btn.disabled = false;
-                progressBar.style.display = 'none';
                 return;
             }
 
-            progressFill.style.width = '100%';
-            logDebug(`تم إنشاء الأرشيف بنجاح! جاري التنزيل...`);
-
+            log(`تم التوليد بنجاح! جاري تنزيل الملف...`);
             const blob = new Blob([out], { type: 'application/zip' });
-            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${zipName}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `${zipName}.zip`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            setTimeout(() => {
-                URL.revokeObjectURL(downloadUrl);
-                btn.disabled = false;
-                progressBar.style.display = 'none';
-                logDebug(`اكتمل التنزيل بنجاح تام 💖`);
-            }, 1000);
+            btn.disabled = false;
         });
     }
 </script>
