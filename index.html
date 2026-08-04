@@ -7,7 +7,6 @@
     
     <title>PURE - أداة ضغط وتجهيز الفصول</title>
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
-    <!-- مكتبة الأيقونات الرسمية -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -67,7 +66,6 @@
         .logo-eye { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--ink) 0 5px, var(--hot-pink) 6px 12px, transparent 13px); border: 2px solid var(--magenta); display: inline-block; }
         .subtitle { font-size: 1.05rem; font-weight: 700; color: var(--deep-pink); margin-top: 4px; }
 
-        /* الأيقونات بمربعات وردية نفس الصورة بالضبط */
         .social-links { display: flex; justify-content: center; gap: 14px; margin-top: 14px; }
         .social-btn { 
             display: flex !important; 
@@ -127,7 +125,7 @@
 <div class="mobile-card">
     <header>
         <div class="logo"><span class="l1">P</span><span class="l2">U</span><span class="logo-eye"></span><span class="l3">R</span><span class="l4">E</span></div>
-        <div class="subtitle">أداة تجميع وتجهيز الفصول</div>
+        <div class="subtitle">أداة تجميع وتجهيز الفصول (v2)</div>
         
         <div class="social-links">
             <a href="https://tiktok.com" target="_blank" class="social-btn"><i class="fa-brands fa-tiktok"></i></a>
@@ -152,7 +150,7 @@
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
         <div class="drop-icon">📂</div>
         <div class="drop-text">اضغط هنا لاختيار صفحات الفصل</div>
-        <div class="drop-subtext">تجنباً لمشاكل الموبايل، اختر الصور دفعة واحدة</div>
+        <div class="drop-subtext">اختر الصور دفعة واحدة</div>
         <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
     </div>
 
@@ -245,10 +243,6 @@
 
                 let percent = Math.round(((i + 1) / total) * 90);
                 progressFill.style.width = `${percent}%`;
-
-                if (i % 15 === 0) {
-                    await new Promise(r => setTimeout(r, 10));
-                }
             }
 
             if (Object.keys(chunks).length === 0) {
