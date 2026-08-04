@@ -51,6 +51,24 @@
             border: 3px solid var(--pale-pink);
         }
 
+        /* الهيدر الخاص بالشعار والروابط */
+        .team-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--pale-pink);
+            padding: 10px 16px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #ffc3e0;
+        }
+        .team-info { display: flex; align-items: center; gap: 10px; }
+        .team-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--hot-pink); }
+        .team-title { font-weight: 800; color: var(--magenta); font-size: 1.1rem; }
+        .social-links { display: flex; gap: 10px; }
+        .social-links a { text-decoration: none; font-size: 1.2rem; transition: transform 0.2s; }
+        .social-links a:hover { transform: scale(1.15); }
+
         .input-group { margin-bottom: 12px; }
         input[type="text"] { 
             width: 100%; 
@@ -188,6 +206,18 @@
 <div class="shard shard-4"></div>
 
 <div class="card">
+    <!-- هيدر الفريق -->
+    <div class="team-header">
+        <div class="team-info">
+            <img src="https://via.placeholder.com/40" alt="PURE Logo" class="team-logo">
+            <span class="team-title">PURE TEAM</span>
+        </div>
+        <div class="social-links">
+            <a href="#" target="_blank" title="Discord">💬</a>
+            <a href="#" target="_blank" title="TikTok">🎵</a>
+        </div>
+    </div>
+
     <div class="input-group">
         <input type="text" id="zipName" placeholder="اسم الملف (مثال: Ch_01_PURE)">
     </div>
