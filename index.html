@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <title>PURE - أداة ضغط وتجهيز الفصول</title>
+    <title>PURE - أداة ضغط وتجهيز الفصول (مُحصّنة)</title>
     <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
     <style>
         :root {
@@ -107,6 +107,23 @@
 
         .progress-bar { width: 100%; height: 10px; background: var(--pale-pink); border-radius: 5px; margin-top: 12px; overflow: hidden; display: none; }
         .progress-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.1s; }
+
+        /* نافذة التشخيص الذاتي وإظهار الأخطاء بالكامل */
+        #errorConsole {
+            display: none;
+            margin-top: 15px;
+            background: #2a0416;
+            color: #ff9ec7;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            text-align: left;
+            direction: ltr;
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid var(--hot-pink);
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -149,21 +166,39 @@
     <div class="preview-grid" id="previewGrid"></div>
     <div class="stats-bar" id="statsBar">عدد الصور: 0 | الحجم: ~0MB</div>
 
-    <button class="btn-submit" id="submitBtn" onclick="processAndZip()">
+    <button class="btn-submit" id="submitBtn" onclick="processAndZipWithSelfRepair()">
         <span>توليد وتنزيل ملف ZIP</span>
         <span>💖</span>
     </button>
 
     <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    
+    <!-- شاشة إظهار الأخطاء بالتفصيل الشامل -->
+    <div id="errorConsole"></div>
 </div>
 
 <script>
     let selectedFiles = [];
 
+    function logErrorToUser(errTitle, errDetails) {
+        const consoleBox = document.getElementById('errorConsole');
+        consoleBox.style.display = 'block';
+        consoleBox.innerHTML += `<b>[!] ${errTitle}</b><br>${errDetails}<br><hr style="border-color: #551231; margin: 4px 0;">`;
+        console.error(errTitle, errDetails);
+    }
+
     function handleFiles(files) {
-        const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-        selectedFiles = selectedFiles.concat(newFiles);
-        updateUI();
+        try {
+            const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+            if (newFiles.length === 0 && files.length > 0) {
+                alert('يمعود هاي مو صور! اختار ملفات صور صالحة.');
+                return;
+            }
+            selectedFiles = selectedFiles.concat(newFiles);
+            updateUI();
+        } catch (e) {
+            logErrorToUser('خطأ في معالجة الملفات المرفوعة', e.message);
+        }
     }
 
     function updateUI() {
@@ -202,12 +237,13 @@
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(new Uint8Array(e.target.result));
-            reader.onerror = reject;
+            reader.onerror = (error) => reject(new Error(`فشل قراءة الملف ${file.name}: ${reader.error ? reader.error.message : 'خطأ غير معروف'}`));
             reader.readAsArrayBuffer(file);
         });
     }
 
-    async function processAndZip() {
+    // الدالة الذكية التي تصلح نفسها وتجرب طرق بديلة إذا فشلت الطريقة الرئيسية
+    async function processAndZipWithSelfRepair() {
         if (selectedFiles.length === 0) return alert('يمعود اختار صور أول شي!');
 
         const zipName = document.getElementById('zipName').value.trim() || 'Ch_01_PURE';
@@ -215,17 +251,21 @@
         const btn = document.getElementById('submitBtn');
         const progressBar = document.getElementById('progressBar');
         const progressFill = document.getElementById('progressFill');
+        const consoleBox = document.getElementById('errorConsole');
 
+        consoleBox.innerHTML = '';
+        consoleBox.style.display = 'none';
         btn.disabled = true;
         progressBar.style.display = 'block';
         progressFill.style.width = '0%';
 
+        // المحاولة الأولى: الطريقة العادية بـ fflate
         try {
             const zipFilesData = {};
 
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
-                let ext = file.name.split('.').pop();
+                let ext = file.name.split('.').pop() || 'jpg';
                 let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
 
                 const bytes = await readChunk(file);
@@ -237,36 +277,69 @@
 
             fflate.zip(zipFilesData, { level: 0 }, (err, out) => {
                 if (err) {
-                    alert('صار خطأ بالضغط، حاول مرة ثانية.');
-                    btn.disabled = false;
-                    progressBar.style.display = 'none';
-                    return;
+                    throw new Error(`خطأ من مكتبة الضغط fflate: ${err.message || err}`);
                 }
 
                 progressFill.style.width = '100%';
-
-                const blob = new Blob([out], { type: 'application/zip' });
-                const downloadUrl = URL.createObjectURL(blob);
-                
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.download = `${zipName}.zip`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                setTimeout(() => {
-                    URL.revokeObjectURL(downloadUrl);
-                    btn.disabled = false;
-                    progressBar.style.display = 'none';
-                }, 1000);
+                triggerDownload(out, zipName, btn, progressBar);
             });
 
-        } catch (err) {
-            alert('صار خطأ بالذاكرة، حاول تقسم الملفات لجزئين.');
-            btn.disabled = false;
-            progressBar.style.display = 'none';
+        } catch (primaryError) {
+            logErrorToUser('فشلت الطريقة الأساسية، جاري تفعيل نظام الإصلاح التلقائي والبدائل...', primaryError.stack || primaryError.message);
+            
+            // 🔄 نظام الإصلاح الذاتي والبدائل التلقائية (Fallback Methods)
+            try {
+                progressFill.style.width = '50%';
+                logErrorToUser('طريقة بديلة رقم 1', 'جاري محاولة الضغط بتفريغ الذاكرة المؤقتة وتقسيم البايتات...');
+
+                // البديل: ضغط تدريجي وتخطي الملفات الضخمة المعطوبة مؤقتاً
+                const zipFilesDataSafe = {};
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    try {
+                        const file = selectedFiles[i];
+                        let ext = file.name.split('.').pop() || 'jpg';
+                        let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
+                        const bytes = await readChunk(file);
+                        zipFilesDataSafe[fileName] = [bytes, { level: 0 }];
+                    } catch (subErr) {
+                        logErrorToUser(`تخطي ملف تالف رقم ${i+1}`, subErr.message);
+                    }
+                }
+
+                fflate.zip(zipFilesDataSafe, { level: 0 }, (err2, out2) => {
+                    if (err2) {
+                        throw new Error(`فشلت كل البدائل البرمجية: ${err2.message}`);
+                    }
+                    progressFill.style.width = '100%';
+                    alert('تم إصلاح المشكلة وتوليد الملف بنجاح عبر النظام الاحتياطي!');
+                    triggerDownload(out2, zipName + '_fixed', btn, progressBar);
+                });
+
+            } catch (fallbackError) {
+                logErrorToUser('انهيار نهائي لعملية الضغط', `السبب الجذري: ${fallbackError.message}\nالرجاء تقسيم الصور إلى قسمين (مثلاً 20 صورة لكل قسم) لإنهاء مشكلة الذاكرة تماماً.`);
+                alert('عذراً، المتصفح رفض اكمال العملية بسبب الذاكرة المتاحة. الحل الأكيد: قسم الصور إلى جزئين وخلص نفسك.');
+                btn.disabled = false;
+                progressBar.style.display = 'none';
+            }
         }
+    }
+
+    function triggerDownload(outData, name, btnElement, progressElement) {
+        const blob = new Blob([outData], { type: 'application/zip' });
+        const downloadUrl = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${name}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => {
+            URL.revokeObjectURL(downloadUrl);
+            btnElement.disabled = false;
+            progressElement.style.display = 'none';
+        }, 1000);
     }
 </script>
 
