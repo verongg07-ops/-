@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PURE - أداة ضغط وتجهيز الفصول</title>
+    <!-- مكتبة fflate فائقة السرعة والخفيفة على ذاكرة الموبايل -->
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+    <style>
+        :root {
+            --white: #ffffff;
+            --grid-line: #f6cfe4;
+            --hot-pink: #ff3d8b;
+            --deep-pink: #c81466;
+            --magenta: #9d0a52;
+            --pale-pink: #ffe1ef;
+            --ink: #4a0b2c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        html, body { min-height: 100vh; }
+
+        body {
+            background-color: #fff;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 38px, var(--grid-line) 38px, var(--grid-line) 39px),
+                repeating-linear-gradient(-45deg, transparent, transparent 38px, var(--grid-line) 38px, var(--grid-line) 39px);
+            color: var(--ink);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .shard { position: fixed; pointer-events: none; z-index: 0; opacity: 0.9; }
+        .shard-1 { top: -60px; left: -40px; width: 260px; height: 260px; background: var(--hot-pink); clip-path: polygon(0 0, 70% 0, 100% 40%, 55% 100%, 0 70%); opacity: 0.85; }
+        .shard-2 { top: 8%; right: -80px; width: 300px; height: 220px; background: var(--deep-pink); clip-path: polygon(100% 0, 100% 100%, 20% 100%, 0 30%, 60% 0); }
+        .shard-3 { bottom: -70px; left: 6%; width: 220px; height: 220px; background: var(--pale-pink); clip-path: polygon(20% 0, 100% 10%, 80% 100%, 0 90%); }
+        .shard-4 { bottom: -40px; right: 4%; width: 240px; height: 180px; background: var(--hot-pink); clip-path: polygon(0 20%, 60% 0, 100% 60%, 40% 100%, 0 80%); opacity: 0.5; }
+
+        .mobile-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            background: #ffffff;
+            border-radius: 26px;
+            padding: 26px 24px;
+            box-shadow: 0 24px 50px rgba(157, 10, 82, 0.18);
+            border: 3px solid var(--pale-pink);
+        }
+
+        header { text-align: center; margin-bottom: 22px; }
+        .logo { font-size: 3.2rem; font-weight: 900; letter-spacing: 2px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; gap: 2px; }
+        .logo span { display: inline-block; -webkit-text-stroke: 2px var(--magenta); }
+        .logo .l1 { color: var(--pale-pink); }
+        .logo .l2 { color: var(--hot-pink); transform: translateY(-2px); }
+        .logo .l3 { color: var(--deep-pink); transform: translateY(2px); }
+        .logo .l4 { color: var(--hot-pink); }
+        .logo-eye { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--ink) 0 5px, var(--hot-pink) 6px 12px, transparent 13px); border: 2px solid var(--magenta); display: inline-block; }
+        .subtitle { font-size: 1.05rem; font-weight: 700; color: var(--deep-pink); margin-top: 4px; }
+
+        .social-links { display: flex; justify-content: center; gap: 12px; margin-top: 12px; }
+        .social-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; color: white; }
+        .tiktok { background: #000; } .discord { background: #5865F2; }
+
+        /* التبديلات والثواير كما في صورة 2 */
+        .toggle-group { background: var(--pale-pink); padding: 12px 16px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #ffc3e0; display: flex; flex-direction: column; gap: 12px; }
+        .toggle-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--magenta); }
+
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f3b8d3; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--hot-pink); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .drop-zone { border: 2.5px dashed var(--hot-pink); background: #fff8fb; border-radius: 18px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 18px; }
+        .drop-icon { font-size: 2.2rem; }
+        .drop-text { font-size: 0.95rem; font-weight: 700; color: var(--magenta); margin-top: 4px; }
+        .drop-subtext { font-size: 0.75rem; color: var(--deep-pink); opacity: 0.8; margin-top: 2px; }
+
+        .preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 160px; overflow-y: auto; margin-bottom: 18px; }
+        .preview-item { position: relative; width: 100%; height: 75px; border-radius: 10px; overflow: hidden; border: 2px solid var(--pale-pink); }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-item .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(157, 10, 82, 0.85); color: white; border: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; cursor: pointer; }
+
+        .stats-bar { background: var(--pale-pink); padding: 10px; border-radius: 12px; text-align: center; font-size: 0.85rem; font-weight: 700; color: var(--magenta); margin-bottom: 16px; }
+
+        .btn-submit { width: 100%; background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit:disabled { background: #d8c1cd; cursor: not-allowed; }
+
+        .progress-bar { width: 100%; height: 10px; background: var(--pale-pink); border-radius: 5px; margin-top: 12px; overflow: hidden; display: none; }
+        .progress-fill { height: 100%; width: 0%; background: var(--hot-pink); transition: width 0.1s; }
+    </style>
+</head>
+<body>
+
+<div class="shard shard-1"></div><div class="shard shard-2"></div>
+<div class="shard shard-3"></div><div class="shard shard-4"></div>
+
+<div class="mobile-card">
+    <header>
+        <div class="logo"><span class="l1">P</span><span class="l2">U</span><span class="logo-eye"></span><span class="l3">R</span><span class="l4">E</span></div>
+        <div class="subtitle">أداة تجميع وتجهيز الفصول</div>
+        
+        <div class="social-links">
+            <a href="https://tiktok.com" target="_blank" class="social-btn tiktok"><span>🎵</span> TikTok</a>
+            <a href="https://discord.gg" target="_blank" class="social-btn discord"><span>💬</span> Discord</a>
+        </div>
+    </header>
+
+    <!-- الخيارات الثلاثة نفس صورة رقم 2 بالضبط -->
+    <div class="toggle-group">
+        <div class="toggle-item">
+            <span>تسمية تسلسلية (001, 002...)</span>
+            <label class="switch">
+                <input type="checkbox" id="renameFiles" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <span>تحويل لـ WebP (قد يسبب بطء للصفحات العملاقة)</span>
+            <label class="switch">
+                <input type="checkbox" id="convertToWebp">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <span>إضافة شعار الفريق (Watermark)</span>
+            <label class="switch">
+                <input type="checkbox" id="addWatermark">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+        <div class="drop-icon">📂</div>
+        <div class="drop-text">اسحب وإفلت الصفحات الطويلة هنا</div>
+        <div class="drop-subtext">تنزل كاملة بدون تقطيع أو ضياع جودة</div>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFiles(this.files)">
+    </div>
+
+    <div class="preview-grid" id="previewGrid"></div>
+    <div class="stats-bar" id="statsBar">عدد الصور: 0 | الحجم: ~0MB</div>
+
+    <button class="btn-submit" id="submitBtn" onclick="processAndZip()">
+        <span>توليد وتنزيل ملف ZIP</span>
+        <span>💖</span>
+    </button>
+
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<script>
+    let selectedFiles = [];
+
+    function handleFiles(files) {
+        const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+        selectedFiles = selectedFiles.concat(newFiles);
+        updateUI();
+    }
+
+    function updateUI() {
+        const previewGrid = document.getElementById('previewGrid');
+        previewGrid.innerHTML = '';
+        
+        let totalSize = 0;
+
+        selectedFiles.forEach((file, index) => {
+            totalSize += file.size;
+            
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerText = '✕';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                URL.revokeObjectURL(img.src);
+                selectedFiles.splice(index, 1);
+                updateUI();
+            };
+
+            item.appendChild(img);
+            item.appendChild(removeBtn);
+            previewGrid.appendChild(item);
+        });
+
+        document.getElementById('statsBar').innerText = `عدد الصور: ${selectedFiles.length} | الحجم: ~${(totalSize / (1024 * 1024)).toFixed(1)}MB`;
+    }
+
+    // معالجة الصور وتحويلها إن طُلِب بدون كراش بالذاكرة
+    async function processImage(file, toWebp, watermark) {
+        if (!toWebp && !watermark) {
+            const buffer = await file.arrayBuffer();
+            return new Uint8Array(buffer);
+        }
+
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                if (watermark) {
+                    ctx.font = 'bold 24px Segoe UI';
+                    ctx.fillStyle = 'rgba(255, 61, 139, 0.6)';
+                    ctx.fillText('PURE TEAM', 20, img.height - 30);
+                }
+
+                const mime = toWebp ? 'image/webp' : file.type;
+                canvas.toBlob((blob) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(new Uint8Array(reader.result));
+                    reader.readAsArrayBuffer(blob);
+                }, mime, 0.85);
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    async function processAndZip() {
+        if (selectedFiles.length === 0) return alert('يمعود اختار صور أول شي!');
+
+        const shouldRename = document.getElementById('renameFiles').checked;
+        const toWebp = document.getElementById('convertToWebp').checked;
+        const watermark = document.getElementById('addWatermark').checked;
+
+        const btn = document.getElementById('submitBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        btn.disabled = true;
+        progressBar.style.display = 'block';
+        progressFill.style.width = '0%';
+
+        try {
+            const zipFilesData = {};
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                let ext = toWebp ? 'webp' : file.name.split('.').pop();
+                let fileName = shouldRename ? `${String(i + 1).padStart(3, '0')}.${ext}` : file.name;
+
+                const fileBytes = await processImage(file, toWebp, watermark);
+                zipFilesData[fileName] = [fileBytes, { level: 0 }];
+
+                let percent = Math.round(((i + 1) / selectedFiles.length) * 85);
+                progressFill.style.width = `${percent}%`;
+            }
+
+            fflate.zip(zipFilesData, (err, out) => {
+                if (err) {
+                    alert('صار خطأ بالضغط، حاول مرة ثانية.');
+                    btn.disabled = false;
+                    return;
+                }
+
+                progressFill.style.width = '100%';
+
+                const blob = new Blob([out], { type: 'application/zip' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `Ch_PURE_${Date.now()}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(link.href);
+                    btn.disabled = false;
+                    progressBar.style.display = 'none';
+                }, 1000);
+            });
+
+        } catch (err) {
+            alert('حدث خطأ أثناء المعالجة، جرب بدون خيار WebP أو قلل الصور.');
+            btn.disabled = false;
+            progressBar.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
